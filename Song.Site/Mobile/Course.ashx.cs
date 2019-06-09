@@ -9,7 +9,7 @@ using VTemplate.Engine;
 namespace Song.Site.Mobile
 {
     /// <summary>
-    /// Notices 的摘要说明
+    /// 
     /// </summary>
     public class Course : BasePage
     {
@@ -23,15 +23,14 @@ namespace Song.Site.Mobile
             //当前课程信息
             int id = WeiSha.Common.Request.QueryString["id"].Int32 ?? 0;
             Song.Entities.Course cou = Business.Do<ICourse>().CourseSingle(id);
-            if (cou == null) return;
+            if (cou == null || !cou.Cou_IsUse) return;
             if ((WeiSha.Common.Request.Cookies["Course_" + cou.Cou_ID].Int32 ?? 0) == 0)
             {
-                cou.Cou_ViewNum++;
-                Business.Do<ICourse>().CourseSave(cou);
+                Business.Do<ICourse>().CourseViewNum(cou, 1);
                 context.Response.Cookies["Course_" + cou.Cou_ID].Value = cou.Cou_ID.ToString();
             }
-            cou.Cou_Logo = Upload.Get["Course"].Virtual + cou.Cou_Logo;
-            cou.Cou_LogoSmall = Upload.Get["Course"].Virtual + cou.Cou_LogoSmall;
+            //cou.Cou_Logo = Upload.Get["Course"].Virtual + cou.Cou_Logo;
+            //cou.Cou_LogoSmall = Upload.Get["Course"].Virtual + cou.Cou_LogoSmall;
             //是否免费，或是限时免费
             if (cou.Cou_IsLimitFree)
             {

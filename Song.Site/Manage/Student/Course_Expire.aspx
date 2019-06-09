@@ -4,7 +4,7 @@
 
 <%@ MasterType VirtualPath="~/Manage/Student/Parents.Master" %>
 <%@ Register Assembly="WeiSha.WebControl" Namespace="WeiSha.WebControl" TagPrefix="cc1" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="cphMain" runat="server">    
+<asp:Content ID="Content1" ContentPlaceHolderID="cphMain" runat="server">
     <div class="itemBox" id="divCourseExpire" runat="server">
         <div class="itemTitle">
             过期课程</div>
@@ -19,6 +19,8 @@
                         <div class="itemName">
                             <a href="/Courses.ashx?sbj=<%# Eval("Sbj_ID","{0}") %>" target="_blank">
                                 <%# Eval("sbj_Name","[专业：{0}]") %></a></div>
+                                <div class="itemName">
+                          课程期限：<%# getBuyInfo(Eval("Cou_ID"))%></div>
                         <div class="itemName">
                             累计学习时间：<%# GetstudyTime(Eval("Cou_ID", "{0}"))%>
                             &nbsp; <a href="#" class="logDetails" onclick="OpenWin('../student/StudyLog_Details.aspx?couid=<%# Eval("Cou_ID")%>',' 《<%# Eval("Cou_Name")%>》',980,80);return false;">
@@ -38,4 +40,8 @@
             </ItemTemplate>
         </asp:Repeater>
     </div>
+    <asp:Panel ID="plNoCourse" runat="server" Visible="false">
+        <div class="noCourse">
+            没有过期的课程</div>
+    </asp:Panel>
 </asp:Content>

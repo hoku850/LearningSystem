@@ -1,6 +1,6 @@
-﻿<script type="text/javascript" src="Sheet.js"></script>
-<link href="Sheet.css" rel="stylesheet" type="text/css" />
-
+﻿
+<link href="Sheet.css?ver={$version}" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/Utility/CoreScripts/jquery.qrcode.min.js?ver={$version}"></script>
         <div class="navi-bar">
             <a href="/" class="nav-txt">首页</a> &gt; <a href="/courses.ashx" class="nav-txt">课程中心</a>
             &gt;
@@ -13,26 +13,35 @@
         </div>
         <div id="couHead">
             <div class="photo">
-                <img style="background: url({$course.cou_logo}) no-repeat center; background-size: 100%;"
-                    src="../../images/alpha.png" /></div>
+                <img src="{$course.cou_logo}" default="../../images/cou_nophoto.jpg" 
+                style="background: url({$course.cou_logo}) no-repeat center; background-size: 100%;"/></div>
             <div class="headRight">
                 <div class="couName">
                     <vt:if var="course.cou_name" value="" compare="!="> {$course.cou_name}
           <vt:else/>
-          (当前课程不存在，可能是参数引用错误) </vt:if>
+          (当前课程不存在，或课程被暂停学习) </vt:if>
                 </div>
-                <div class="couNum">
+                <div class="headinfo">
+                <div class="couNum headrow">
                     <span>关注次数：</span>{$course.cou_viewNum}
                 </div>
-                <div class="couIntro">
-                    <span>学习目标：</span>
-                    <vt:function var="intro" method="ClearHtml" args="$course.Cou_Target" />
-                    {$:#.intro}
-                </div>
-                <div class="couTeacer">
+               
+                    <div id="course-qrcode"></div>
+                
+                <div class="couTeacer headrow">
                     <span>主讲老师： </span>{$course.th_name}
                 </div>
-                <div class="couMoney">
+                <div class="bdsharebuttonbox">
+                    <a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_qzone" data-cmd="qzone"
+                        title="分享到QQ空间"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博">
+                    </a><a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a href="#" class="bds_renren"
+                        data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_weixin" data-cmd="weixin"
+                            title="分享到微信"></a>
+                </div>
+                <script type="text/javascript" language="javascript">                    window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "2", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "24" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)]; 
+                </script>
+                </div>
+                <div class="couMoney headrow">
                     <span>学习费用：</span>
                     <vt:if var="course.cou_isfree" value="true" compare="=">
                      <span class="moneyfree"><span class="moneyico">&#xe746;</span> <span> 免费</span></span>
@@ -49,18 +58,11 @@
          
         </vt:if>
                 </div>
-                <div class="bdsharebuttonbox">
-                    <a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_qzone" data-cmd="qzone"
-                        title="分享到QQ空间"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博">
-                    </a><a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a href="#" class="bds_renren"
-                        data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_weixin" data-cmd="weixin"
-                            title="分享到微信"></a>
-                </div>
-                <script type="text/javascript" language="javascript">                    window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "2", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "24" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)]; 
-                </script>
+                
                 <div class="couBtnBox">
                     <!--按钮开始-->
                     <vt:if var="Account.Ac_id" value="0" compare=">">
+                     <vt:if var="course.cou_name" value="" compare="!=">
           <vt:if var="isStudy" value="True" compare="=" remark="如果已经在学习了">          
               <div class="couBtn"> <a href="CourseStudy.ashx?couid={$course.cou_id}" target="_blank" class="bvr_mr" title="开始学习">开始学习</a></div>         
             <vt:else/>
@@ -71,10 +73,15 @@
                 <div class="couBtn btn1 study"> <a href="CourseStudy.ashx?couid={$course.cou_id}" target="_blank" class="bvr_mr" title="开始学习">开始学习</a></div>
                  <div class="couBtn btn2"> <a href="CourseBuy.ashx?couid={$course.cou_id}" isPass="{$Account.Ac_isPass}" state="noSelected" target="_blank" title="选修该课程">选修该课程</a> </div>
                 <vt:else/>
+                <vt:if var="course.Cou_IsTry" value="true" compare="=" remark="可以试学">
+                <div class="couBtn btn1 study"> <a href="CourseStudy.ashx?couid={$course.cou_id}" target="_blank" class="bvr_mr" title="试学">试学</a></div>
+                 <div class="couBtn btn2"> <a href="CourseBuy.ashx?couid={$course.cou_id}" isPass="{$Account.Ac_isPass}" state="noSelected" target="_blank" title="选修该课程">选修该课程</a> </div>
+                 <vt:else/>
                 <div class="couBtn"> <a href="CourseBuy.ashx?couid={$course.cou_id}" isPass="{$Account.Ac_isPass}" state="noSelected" target="_blank" title="选修该课程">选修该课程</a> </div>
+                </vt:if>
                </vt:if>
              </vt:if>
-            
+            </vt:if>
           </vt:if>
           <vt:else/>
           <div class="couBtn"> <a href="student/index.ashx" title="请选登录">登录学习</a></div>
@@ -99,6 +106,11 @@
                 <div class="tab-context">
                     <!--课程介绍-->
                     <div class="introBox">
+                     <vt:function var="intro" method="ClearHtml" args="$course.Cou_Target" />
+                     <vt:if var="intro" value="" compare="!="  remark="学习目标">
+                    <span>学习目标：</span>                   
+                    <div class="couIntro">{$:#.intro}</div>
+                    </vt:if> 
                         {$course.cou_intro}
                     </div>
                     <!--章节列表-->
@@ -111,17 +123,17 @@
                  <span class="obtn disable">未完结</span>
                   <vt:else />                  
                 <vt:if var="isStudy" value="true" compare="="  remark="是否已经选修">
-                 <span class="obtn enable"><a href="CourseStudy.ashx?id={$:#.d.ol_id}">学习 </a></span>
+                 <span class="obtn enable"><a href="CourseStudy.ashx?olid={$:#.d.ol_id}">学习 </a></span>
                   <vt:else />
                   <vt:if var="course.Cou_IsFree" value="true" compare="="  remark="如果未选修，但是课程免费"> 
-                  <span class="obtn enable"><a href="CourseStudy.ashx?id={$:#.d.ol_id}">免费 </a></span>
+                  <span class="obtn enable"><a href="CourseStudy.ashx?olid={$:#.d.ol_id}">免费 </a></span>
                     <vt:else />
                     <vt:if var="course.Cou_IsLimitFree" value="true" compare="="  remark="课程不免费，但处在限时免费中"> 
-                    <span class="obtn enable"><a href="CourseStudy.ashx?id={$:#.d.ol_id}">免费 </a></span>
+                    <span class="obtn enable"><a href="CourseStudy.ashx?olid={$:#.d.ol_id}">免费 </a></span>
                      <vt:else />
                      <vt:if var="course.Cou_IsTry" value="true" compare="="  remark="是否允许试学">                    
                     <vt:if var="d.Ol_IsFree" value="true" compare="="  remark="可以试学">
-                     <span class="obtn enable"><a href="CourseStudy.ashx?id={$:#.d.ol_id}">试学 </a></span>
+                     <span class="obtn enable"><a href="CourseStudy.ashx?olid={$:#.d.ol_id}">试学 </a></span>
                     <vt:else />
                     <span class="obtn buy"><a href="CourseBuy.ashx?couid={$course.cou_id}">购买</a></span>
                   </vt:if> <vt:else />
@@ -191,7 +203,12 @@
                     </div>
                     <ul class="studentbox">
                         <vt:foreach id="students" from="$#.students" item="data" count="20" index="i" remark="学员列表">
-            <li><span class="stPhoto" style="background:url({$stpath}{$:#.data.Ac_photo}) no-repeat center center"> &nbsp; </span>{$:#.data.Ac_Name}</li>
+            <li><img class="stPhoto" src="{$stpath}{$:#.data.Ac_photo}" default="/Utility/images/head1.jpg"/> &nbsp; </span>
+             <vt:if var="data.Ac_Name" value="" compare="="  remark="没有学员姓名">
+            (无名)
+            <vt:else />
+             {$:#.data.Ac_Name}
+             </vt:if></li>
           </vt:foreach>
                     </ul>
                 </div>
@@ -213,4 +230,4 @@
             </div>
         </div>
 
-
+<script type="text/javascript" src="Sheet.js?ver={$version}"></script>

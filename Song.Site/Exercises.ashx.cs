@@ -50,7 +50,7 @@ namespace Song.Site
             Song.Entities.Outline outline = Business.Do<IOutline>().OutlineSingle(olid);
             if (outline != null)
             {
-                bool isBuy = Business.Do<ICourse>().IsBuy(outline.Cou_ID, Extend.LoginState.Accounts.CurrentUser.Ac_ID, 1);
+                bool isBuy = Business.Do<ICourse>().IsBuy(outline.Cou_ID, Extend.LoginState.Accounts.UserID);
                 if (isBuy)
                 {
                     sumCount = Business.Do<IQuestions>().QuesOfCount(Organ.Org_ID, 0, 0, olid, type, diff, true);
@@ -63,7 +63,7 @@ namespace Song.Site
                     if (course.Cou_IsTry)
                     {
                         sumCount = Business.Do<IQuestions>().QuesOfCount(Organ.Org_ID, 0, 0, olid, type, diff, true);
-                        sumCount = sumCount > course.Cou_TryNum ? course.Cou_TryNum : sumCount;
+                        //sumCount = sumCount > course.Cou_TryNum ? course.Cou_TryNum : sumCount;
                     }
                     this.Document.Variables.SetValue("isTry", istry);
                 }

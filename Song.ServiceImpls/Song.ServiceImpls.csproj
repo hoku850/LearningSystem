@@ -50,6 +50,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\Song.ServiceImpls.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -133,10 +134,12 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
-    <Reference Include="WeiSha.Common">
+    <Reference Include="WeiSha.Common, Version=1.1.0.0, Culture=neutral, PublicKeyToken=fd39f026add70812, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\WeiSha.Common.dll</HintPath>
     </Reference>
-    <Reference Include="WeiSha.Data">
+    <Reference Include="WeiSha.Data, Version=3.0.0.0, Culture=neutral, PublicKeyToken=fd39f026add70812, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\WeiSha.Data.dll</HintPath>
     </Reference>
     <Reference Include="WeiSha.SMS">
@@ -181,6 +184,7 @@
     <Compile Include="AccountsCom.cs" />
     <Compile Include="ProfitSharingCom.cs" />
     <Compile Include="LearningCardCom.cs" />
+    <Compile Include="SSOCom.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Song.Entities\Song.Entities.csproj">

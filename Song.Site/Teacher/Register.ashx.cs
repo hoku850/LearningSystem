@@ -20,6 +20,7 @@ namespace Song.Site.Teacher
             //是否允许注册
             WeiSha.Common.CustomConfig config = CustomConfig.Load(this.Organ.Org_Config);
             this.Document.SetValue("IsRegTeacher", config["IsRegTeacher"].Value.Boolean ?? true);
+            this.Document.SetValue("IsRegSms", config["IsRegSms"].Value.Boolean ?? true);    //是否要短信验证
             //操作步骤
             this.Document.SetValue("step", step);
             //注册协议
@@ -30,7 +31,7 @@ namespace Song.Site.Teacher
                 {
                     agreement = Regex.Replace(agreement, "{platform}", this.Organ.Org_PlatformName, RegexOptions.IgnoreCase);
                     agreement = Regex.Replace(agreement, "{org}", this.Organ.Org_AbbrName, RegexOptions.IgnoreCase);
-                    agreement = Regex.Replace(agreement, "{domain}", WeiSha.Common.Request.Domain.MainName, RegexOptions.IgnoreCase);
+                    agreement = Regex.Replace(agreement, "{domain}", WeiSha.Common.Server.MainName, RegexOptions.IgnoreCase);
                 }
                 this.Document.SetValue("Agreement", agreement);
             }

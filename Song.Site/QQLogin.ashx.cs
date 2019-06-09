@@ -44,9 +44,10 @@ namespace Song.Site
                 this.Document.Variables.SetValue("token", access_token);
                 this.Document.Variables.SetValue("openid", openid);
                 //设置主域，用于js跨根域
-                if (!WeiSha.Common.Server.IsLocalIP) this.Document.Variables.SetValue("domain", WeiSha.Common.Request.Domain.MainName);
+                int multi = Business.Do<ISystemPara>()["MultiOrgan"].Int32 ?? 0;
+                if (multi == 0 && !WeiSha.Common.Server.IsLocalIP) this.Document.Variables.SetValue("domain", WeiSha.Common.Server.MainName);
                 //QQ回调域
-                string returl = Business.Do<ISystemPara>()["QQReturl"].Value ?? WeiSha.Common.Request.Domain.MainName;
+                string returl = Business.Do<ISystemPara>()["QQReturl"].Value ?? WeiSha.Common.Server.MainName;
                 this.Document.SetValue("QQReturl", returl);
                 //当前机构
                 Song.Entities.Organization org = getOrgan();
@@ -117,7 +118,7 @@ namespace Song.Site
         /// <returns></returns>
         protected string getOrganDomain(Song.Entities.Organization org)
         {
-            string root = WeiSha.Common.Request.Domain.MainName;
+            string root = WeiSha.Common.Server.MainName;
             return org.Org_TwoDomain + "." + root;
         }
         /// <summary>
@@ -129,7 +130,7 @@ namespace Song.Site
             string code = WeiSha.Common.Request.QueryString["code"].String;     //用户登录后，qq平台返回的代码
             string appid = Business.Do<ISystemPara>()["QQAPPID"].String;    //应用id
             string secret = Business.Do<ISystemPara>()["QQAPPKey"].String;  //密钥
-            string returl = Business.Do<ISystemPara>()["QQReturl"].Value ?? "http://" + WeiSha.Common.Request.Domain.MainName;
+            string returl = Business.Do<ISystemPara>()["QQReturl"].Value ?? "http://" + WeiSha.Common.Server.MainName;
             string redirect = HttpUtility.HtmlEncode(returl + "/qqlogin.ashx");
             //
             string url = "https://graph.qq.com/oauth2.0/token?client_id={0}&client_secret={1}&code={2}&grant_type=authorization_code&redirect_uri={3}";
@@ -138,7 +139,7 @@ namespace Song.Site
             string error = string.Empty;
             try
             {
-                string retjson = WeiSha.Common.Request.WebResult(url);
+                string retjson = WeiSha.Common.Request.HttpGet(url);
                 Regex r = new Regex(@"(?<=access_token=)\S[^&]+(?=&)");
                 Match macth = r.Match(retjson);
                 if (macth.Success)
@@ -167,7 +168,7 @@ namespace Song.Site
             //获取当前QQ登录账户的Opeinid
             string openid = string.Empty;
             string url = "https://graph.qq.com/oauth2.0/me?access_token=" + access_token;
-            string retjson = WeiSha.Common.Request.WebResult(url);
+            string retjson = WeiSha.Common.Request.HttpGet(url);
             Regex r = new Regex(@"(?<=""openid"":"")\S[^""]+(?=""})");
             Match macth = r.Match(retjson);
             if (macth.Success)
@@ -192,7 +193,7 @@ namespace Song.Site
             Song.Entities.Accounts acc = new Entities.Accounts();
             try
             {
-                string infoJson = WeiSha.Common.Request.WebResult(userUrl);
+                string infoJson = WeiSha.Common.Request.HttpGet(userUrl);
                 JObject jo = (JObject)JsonConvert.DeserializeObject(infoJson);
                 string ret = jo["ret"] != null ? jo["ret"].ToString() : string.Empty;  //返回码
                 string msg = jo["msg"] != null ? jo["msg"].ToString() : string.Empty;  //返回的提示信息

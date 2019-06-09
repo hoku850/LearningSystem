@@ -20,6 +20,8 @@ namespace Song.Site.Mobile
         protected string loyout = WeiSha.Common.Request.QueryString["loyout"].String;
         protected override void InitPageTemplate(HttpContext context)
         {
+            if (Extend.LoginState.Accounts.IsLogin)
+                this.Response.Redirect("default.ashx");
             //相关参数
             WeiSha.Common.CustomConfig config = CustomConfig.Load(this.Organ.Org_Config);
             //登录方式
@@ -28,6 +30,7 @@ namespace Song.Site.Mobile
             this.Document.SetValue("forpw", IsLoginForPw);
             this.Document.SetValue("forsms", IsLoginForSms);
             this.Document.SetValue("islogin", !IsLoginForPw && !IsLoginForSms);
+            this.Document.SetValue("isWeixin", WeiSha.Common.Browser.IsWeixin); //是否在微信中
             //界面状态
             if (!IsLoginForPw && IsLoginForSms) loyout = "mobile";
             this.Document.SetValue("loyout", loyout);
@@ -65,21 +68,26 @@ namespace Song.Site.Mobile
             //QQ登录
             this.Document.SetValue("QQLoginIsUse", Business.Do<ISystemPara>()["QQLoginIsUse"].Boolean ?? true);
             this.Document.SetValue("QQAPPID", Business.Do<ISystemPara>()["QQAPPID"].String);
-            this.Document.SetValue("QQReturl", Business.Do<ISystemPara>()["QQReturl"].Value ?? "http://" + WeiSha.Common.Request.Domain.MainName);
+            this.Document.SetValue("QQReturl", Business.Do<ISystemPara>()["QQReturl"].Value ?? "http://" + WeiSha.Common.Server.MainName);
             //微信登录
             this.Document.SetValue("WeixinLoginIsUse", Business.Do<ISystemPara>()["WeixinLoginIsUse"].Boolean ?? false);
             this.Document.SetValue("WeixinAPPID", Business.Do<ISystemPara>()["WeixinpubAPPID"].String);
-            this.Document.SetValue("WeixinReturl", Business.Do<ISystemPara>()["WeixinpubReturl"].Value ?? "http://" + WeiSha.Common.Request.Domain.MainName);
+            this.Document.SetValue("WeixinReturl", Business.Do<ISystemPara>()["WeixinpubReturl"].Value ?? "http://" + WeiSha.Common.Server.MainName);
+            //金碟云之家登录
+            this.Document.SetValue("YunzhijiaLoginIsuse", Business.Do<ISystemPara>()["YunzhijiaLoginIsuse"].Boolean ?? false);
             //记录当前机构到本地，用于QQ或微信注册时的账户机构归属问题
             System.Web.HttpCookie cookie = new System.Web.HttpCookie("ORGID");
             cookie.Value = this.Organ.Org_ID.ToString();
-            if (!WeiSha.Common.Server.IsLocalIP) cookie.Domain = WeiSha.Common.Request.Domain.MainName;
+            //如果是多机构，又不用IP访问，则用根域写入cookie
+            int multi = Business.Do<ISystemPara>()["MultiOrgan"].Int32 ?? 0;
+            if (multi == 0 && !WeiSha.Common.Server.IsLocalIP) cookie.Domain = WeiSha.Common.Server.MainName;
             this.Response.Cookies.Add(cookie);
             //推荐人id
             string sharekeyid = WeiSha.Common.Request.QueryString["sharekeyid"].String;
             System.Web.HttpCookie cookieShare = new System.Web.HttpCookie("sharekeyid");
             cookieShare.Value = sharekeyid;
-            if (!WeiSha.Common.Server.IsLocalIP) cookie.Domain = WeiSha.Common.Request.Domain.MainName;
+            //如果是多机构，又不用IP访问，则用根域写入cookie
+            if (multi == 0 && !WeiSha.Common.Server.IsLocalIP) cookieShare.Domain = WeiSha.Common.Server.MainName;
             this.Response.Cookies.Add(cookieShare);
         }
 

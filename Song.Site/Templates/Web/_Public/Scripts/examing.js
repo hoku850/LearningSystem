@@ -301,7 +301,7 @@ Examing.setExamQuesLayout = function (examobj) {
         for (var j = 0; j < ques[i].ques.length; j++) {
             var q = ques[i].ques[j];
             if (q != null && q != undefined && q != '') {
-                q.Qus_Title = q.Qus_Title.replace(/&quot;/ig, "\"");
+                //q.Qus_Title = q.Qus_Title.replace(/&quot;/ig, "\"");
             }
         }
         var func = eval("setQuestionLayout" + ques[i].type);
@@ -397,14 +397,15 @@ function setQuestionLayout1(qitem, typeIndex, indexHanzi) {
     for (var i = 0; i < qitem.ques.length; i++) {
         var q = qitem.ques[i];
         html += "<dd qid='" + q.Qus_ID + "' number='" + q.Qus_Number + "'>";
-        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + q.Qus_Title + "（" + q.Qus_Number + "分）</div></div>";
+		var x=unescape(q.Qus_Title) ;
+        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + unescape(q.Qus_Title) + "（" + q.Qus_Number + "分）</div></div>";
         //选择项
         html += "<div class='itemBox type1'>";
         var answer = q.Answer;
         for (var j = 0; j < answer.length; j++) {
             html += "<div class=\"ansItem\" ansid=\"" + answer[j].Ans_ID + "\">";
             html += "<div class='char' >" + String.fromCharCode(65 + j) + "、</div>"
-            html += "<div class=\"ansItemContext\">" + answer[j].Ans_Context + "</div></div>";
+            html += "<div class=\"ansItemContext\">" + unescape(answer[j].Ans_Context) + "</div></div>";
         }
         html += "</div>";
         //选择按钮
@@ -426,14 +427,14 @@ function setQuestionLayout2(qitem, typeIndex, indexHanzi) {
     for (var i = 0; i < qitem.ques.length; i++) {
         var q = qitem.ques[i];
         html += "<dd qid='" + q.Qus_ID + "' number='" + q.Qus_Number + "'>";
-        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + q.Qus_Title + "（" + q.Qus_Number + "分）</div></div>";
+        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + unescape(q.Qus_Title) + "（" + q.Qus_Number + "分）</div></div>";
         //选项
         html += "<div class='itemBox type2'>";
         var answer = q.Answer;
         for (var j = 0; j < answer.length; j++) {
             html += "<div class=\"ansItem\" ansid=\"" + answer[j].Ans_ID + "\">";
             html += "<div class='char'>" + String.fromCharCode(65 + j) + "、</div>"
-            html += "<div class=\"ansItemContext\">" + answer[j].Ans_Context + "</div></div>";
+            html += "<div class=\"ansItemContext\">" + unescape(answer[j].Ans_Context) + "</div></div>";
         }
         html += "</div>";
         //选择按钮
@@ -454,7 +455,7 @@ function setQuestionLayout3(qitem, typeIndex, indexHanzi) {
     for (var i = 0; i < qitem.ques.length; i++) {
         var q = qitem.ques[i];
         html += "<dd qid='" + q.Qus_ID + "' number='" + q.Qus_Number + "'>";
-        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + q.Qus_Title + "（" + q.Qus_Number + "分）</div></div>";
+        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + unescape(q.Qus_Title) + "（" + q.Qus_Number + "分）</div></div>";
         //按钮
         html += "<div class='itemBtnBox type3'>";
         html += "<div class='ansBtn' ansid=\"0\">正确</div>";
@@ -472,7 +473,7 @@ function setQuestionLayout4(qitem, typeIndex, indexHanzi) {
     for (var i = 0; i < qitem.ques.length; i++) {
         var q = qitem.ques[i];
         html += "<dd qid='" + q.Qus_ID + "' number='" + q.Qus_Number + "'>";
-        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + q.Qus_Title + "（" + q.Qus_Number + "分）</div></div>";
+        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + unescape(q.Qus_Title) + "（" + q.Qus_Number + "分）</div></div>";
         //选项
         html += "<div class='itemBox'>";
         html += "<textarea name=''></textarea>";
@@ -492,7 +493,7 @@ function setQuestionLayout5(qitem, typeIndex, indexHanzi) {
     for (var i = 0; i < qitem.ques.length; i++) {
         var q = qitem.ques[i];
         html += "<dd qid='" + q.Qus_ID + "' number='" + q.Qus_Number + "'>";
-        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + q.Qus_Title + "（" + q.Qus_Number + "分）</div></div>";
+        html += "<div class='titleBox'><div class='order'></div><div class='title'>" + unescape(q.Qus_Title) + "（" + q.Qus_Number + "分）</div></div>";
         //选项
         html += "<div class='itemBox'>";
         var answer = q.Answer;
@@ -704,6 +705,9 @@ function submitResult(patter) {
     //提交
     var xml = encodeURIComponent(getResultXml(patter));
     var urlPath = "/ajax/InResult.ashx?timestamp=" + new Date().getTime();
+	if (patter == 1){
+		$.storage("exam_"+examID,xml);
+	}
     $.ajax({
         type: "POST", url: urlPath, dataType: "text", data: { result: xml },
         //开始，进行预载
@@ -762,6 +766,14 @@ function getResultXml(patter) {
 实现断电不丢答题信息
 */
 function getResult() {
+	//var result=$("#result").text();
+//	if(result!=""){
+//		var result = eval("(" + result + ")");
+//        setResultState(result);
+//		submitResult(1);
+//		 Mask.LoadingClose();
+//		return;
+//	}
     var urlPath = "/ajax/GetResult.ashx?timestamp=" + new Date().getTime();
     $.ajax({
         type: "GET", url: urlPath, dataType: "text",

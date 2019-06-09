@@ -198,6 +198,13 @@ namespace Song.ServiceInterfaces
         /// <returns></returns>
         ExamResults ResultSingle(int exrid);
         /// <summary>
+        /// 通过学员ID与考试ID，获取成绩（最好成绩）
+        /// </summary>
+        /// <param name="accid"></param>
+        /// <param name="examid"></param>
+        /// <returns></returns>
+        ExamResults ResultSingle(int accid, int examid);
+        /// <summary>
         /// 计算当前考试结果的成绩
         /// </summary>
         /// <param name="resu"></param>
@@ -227,10 +234,17 @@ namespace Song.ServiceInterfaces
         /// <summary>
         /// 考试主题下的所有参考人员成绩
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">当前考试主题的ID</param>
         /// <param name="stsid">学生分组的id，为0时取所有，为-1时取不在组的学员，大于0则取当前组学员</param>
         /// <returns></returns>
-        DataTable Result4Theme(int id, int stsid);
+        DataTable Result4Theme(int examid, int stsid);
+        /// <summary>
+        /// 考试主题下的所有参考人员成绩
+        /// </summary>
+        /// <param name="id">当前考试主题的ID</param>
+        /// <param name="stsid">学生分组的id，为0时取所有，为-1时取不在组的学员，大于0则取当前组学员</param>
+        /// <returns></returns>
+        DataTable Result4Theme(int examid, string stsid);
         /// <summary>
         /// 考试主题下的所有参考人员成绩
         /// </summary>
@@ -244,7 +258,7 @@ namespace Song.ServiceInterfaces
         /// </summary>
         /// <param name="examid"></param>
         /// <returns></returns>
-        DataTable Result4StudentSort(int examid);
+        DataTable Result4StudentSort(int examid);        
         /// <summary>
         /// 计算某个考试主题的及格率
         /// </summary>

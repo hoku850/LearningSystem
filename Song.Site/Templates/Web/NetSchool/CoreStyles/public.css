@@ -42,8 +42,7 @@ img {
 	display: block;
 }
 /*页面头部*/
-t('woff'), /* chrome、firefox */ url('moneyico/money.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/ url('moneyico/money.svg#money') format('svg'); /* iOS 4.1- */
-}
+
 .iconfont {
 	font-family: "iconfont" !important;
 	font-size: 16px;
@@ -616,6 +615,7 @@ img {
 }
 .pagerIndex {
 	width: 40px;
+	margin-bottom: 5px;
 	border-top-width: 1px;
 	border-right-width: 1px;
 	border-bottom-width: 1px;

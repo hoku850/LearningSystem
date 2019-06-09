@@ -165,9 +165,9 @@ namespace Song.ServiceInterfaces
         /// <summary>
         /// 使用该学习卡
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="card">学习卡</param>
         /// <param name="acc">学员账号</param>
-        void CardUse(LearningCard entity, Accounts acc);
+        void CardUse(LearningCard card, Accounts acc);
         /// <summary>
         /// 获取该学习卡，只是暂存在学员账户名下，并不使用
         /// </summary>
@@ -179,6 +179,12 @@ namespace Song.ServiceInterfaces
         /// </summary>
         /// <param name="entity"></param>
         void CardRollback(LearningCard entity);
+        /// <summary>
+        /// 学习卡使用后的回滚，将删除学员的关联课程
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="isclear">是否清理学习记录</param>
+        void CardRollback(LearningCard entity,bool isclear);
         /// <summary>
         /// 学习卡设置项下的所有学习卡
         /// </summary>

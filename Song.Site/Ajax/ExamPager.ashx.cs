@@ -142,25 +142,6 @@ namespace Song.Site.Ajax
             json += "]";
             return json;
         }
-        /// <summary>
-        /// 处理试题内容
-        /// </summary>
-        /// <param name="ques"></param>
-        /// <returns></returns>
-        private Song.Entities.Questions quesClear(Song.Entities.Questions ques)
-        {
-            if (ques == null) return ques;
-            ques.Qus_Title = ques.Qus_Title.Replace("&lt;", "<");
-            ques.Qus_Title = ques.Qus_Title.Replace("&gt;", ">");
-            ques.Qus_Title = ques.Qus_Title.Replace("{", "｛");
-            ques.Qus_Title = ques.Qus_Title.Replace("}", "｝");
-            ques.Qus_Title = ques.Qus_Title.Replace("\n", "<br/>");
-            ques.Qus_Title = ques.Qus_Title.Replace("\r", "<br/>");
-            //ques.Qus_Title = ques.Qus_Title.Replace(" ", "　");
-            ques.Qus_Title = Extend.Html.ClearHTML(ques.Qus_Title, "p", "div", "font", "pre");
-           
-            return ques;
-        }
         #endregion
 
         /// <summary>
@@ -170,9 +151,9 @@ namespace Song.Site.Ajax
         /// <returns></returns>
         private string getQuesJson(Song.Entities.Questions q)
         {
-            q = quesClear(q);
-            q = Extend.Questions.TranText(q);   //处理文件
-            q.Qus_Title = q.Qus_Title.Replace("\"", "&quot;");  //转换双引号
+            //q = quesClear(q);
+            //q = Extend.Questions.TranText(q);   //处理文件
+            //q.Qus_Title = q.Qus_Title.Replace("\"", "&quot;");  //转换双引号
             string quesJs = q.ToJson("Qus_ID,Qus_Title,Qus_Diff,Qus_Type,Qus_UID,Qus_Number", null);
             //如果是单选题，或多选题，或填空题
             if (q.Qus_Type == 1 || q.Qus_Type == 2 || q.Qus_Type == 5)

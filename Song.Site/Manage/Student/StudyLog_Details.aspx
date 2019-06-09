@@ -20,35 +20,44 @@
             <asp:TemplateField HeaderText="章节">
                 <ItemStyle CssClass="left" />
                 <ItemTemplate>
-                    <%# Eval("Tree")%></span><%# Eval("Ol_Name")%>
+                    <%# Eval("Tree")%></span>
+                    <a href='/CourseStudy.ashx?id=<%# Eval("Ol_ID", "{0}")%>' target="_blank"> <%# Eval("Ol_IsVideo", "{0}") == "True" ? Eval("Ol_Name","<b>{0}</b>") : Eval("Ol_Name")%></a>
+                    
+                </ItemTemplate>
+            </asp:TemplateField>
+            <asp:TemplateField HeaderText="视频">
+                <ItemStyle CssClass="center" Width="40px" />
+                <ItemTemplate>
+                    <%# Eval("Ol_IsVideo", "{0}")=="True" ? "" : "无"%>
                 </ItemTemplate>
             </asp:TemplateField>
             <asp:TemplateField HeaderText="学习时间">
                 <ItemStyle CssClass="center" Width="150px" />
                 <ItemTemplate>
-                    <%# Eval("LastTime", "{0:yyyy-MM-dd HH:mm:ss}")%>
+                    <%# Eval("playTime","{0}")=="0" ? "" : Eval("LastTime", "{0:yyyy-MM-dd HH:mm:ss}")%>
                 </ItemTemplate>
             </asp:TemplateField>
-            <asp:TemplateField HeaderText="观看进度">
-                <ItemStyle CssClass="center" Width="100px" />
+            <asp:TemplateField HeaderText="进度/视频时长">
+                <ItemStyle CssClass="center" Width="120px" />
                 <ItemTemplate>
-                    <%# CaleTotalTime(Eval("playTime", "{0}"))%>
+                    <%# CaleTotalTime(Eval("playTime", "{0}"),"{0} /")%>
+                     <%# CaleTotalTime(Eval("totalTime", "{0}"), "{0}")%>                 
                 </ItemTemplate>
             </asp:TemplateField>
-            <asp:TemplateField HeaderText="视频时长">
-                <ItemStyle CssClass="center" Width="100px" />
+           <%-- <asp:TemplateField HeaderText="视频时长">
+                <ItemStyle CssClass="center" Width="80px" />
                 <ItemTemplate>
                     <%# CaleTotalTime(Eval("totalTime", "{0}"))%>
                 </ItemTemplate>
-            </asp:TemplateField>
-            <asp:TemplateField HeaderText="累计学习">
-                <ItemStyle CssClass="center" Width="100px" />
+            </asp:TemplateField>--%>
+            <asp:TemplateField HeaderText="累计时长">
+                <ItemStyle CssClass="center" Width="80px" />
                 <ItemTemplate>
                     <%# CaleStudyTime(Eval("studyTime", "{0}"))%>
                 </ItemTemplate>
             </asp:TemplateField>
             <asp:TemplateField HeaderText="完成度">
-                <ItemStyle CssClass="center" Width="100px" />
+                <ItemStyle CssClass="center" Width="80px" />
                 <ItemTemplate>
                     <%# Convert.ToDouble(Eval("complete", "{0}") == "" ? "0" : Eval("complete", "{0}")) >= 100 ? "100%" : Eval("complete", "{0:0.00}%")%>
                 </ItemTemplate>

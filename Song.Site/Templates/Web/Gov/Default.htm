@@ -3,12 +3,12 @@
 <head>
     <title>{$org.org_platformname}</title>
     <vt:include file="inc/meta.inc" />
-    <link href="Styles/Default.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="Scripts/Default.js"></script>
-    <script type="text/javascript" src="Scripts/slider.js"></script>
-    <script type="text/javascript" src="Scripts/jquery.luara.0.0.1.min.js"></script>
-    <link rel="stylesheet" href="Styles/lunhuan/style.css" />
-    <link rel="stylesheet" href="Styles/lunhuan/luara.left.css" />
+    <link href="Styles/Default.css?ver={$version}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="Scripts/Default.js?ver={$version}"></script>
+    <script type="text/javascript" src="Scripts/slider.js?ver={$version}"></script>
+    <script type="text/javascript" src="Scripts/jquery.luara.0.0.1.min.js?ver={$version}"></script>
+    <link rel="stylesheet" href="Styles/lunhuan/style.css?ver={$version}" />
+    <link rel="stylesheet" href="Styles/lunhuan/luara.left.css?ver={$version}" />
 </head>
 <body>
     <vt:include file="inc/Header.html" />
@@ -163,7 +163,7 @@
                 <div class="courseList">
                     <div class="courseListInner">
                         <vt:list type="course" item="data" index="i" count="4" order="flux" remark="课程">
-            <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}" /> </a>
+            <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}"  default="images/cou_nophoto.jpg"/> </a>
               <div class="itemInfo"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}">{$:#.data.cou_name} </a>
                 <div class="itemDetails"><span class="hot-left count" title="访问量">{$:#.data.cou_viewNum}</span> <span class="hot-right">{$:#.data.sbj_name}</span> </div>
               </div>
@@ -209,7 +209,7 @@
         <div class="courseList" style="display:none" type="area"  index="{$:j}">
           <div class="courseListInner">
             <vt:foreach from="$#.s" item="data" index="i" count="4" remark="课程">
-              <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}" /> </a>
+              <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}"  default="images/cou_nophoto.jpg"/> </a>
                 <div class="itemInfo"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}">{$:#.data.cou_name} </a>
                   <div class="itemDetails"><span class="hot-left count" title="访问量">{$:#.data.cou_viewNum}</span> <span class="hot-right">{$:#.data.sbj_name}</span> </div>
                 </div>
@@ -260,7 +260,7 @@
         <div class="courseList" style="display:none" type="area"  index="{$:j}">
           <div class="courseListInner">
             <vt:foreach from="$#.s" item="data" index="i" count="4" remark="课程">
-              <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}" /> </a>
+              <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}"  default="images/cou_nophoto.jpg"/> </a>
                 <div class="itemInfo"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}">{$:#.data.cou_name} </a>
                   <div class="itemDetails"><span class="hot-left count" title="访问量">{$:#.data.cou_viewNum}</span> <span class="hot-right">{$:#.data.sbj_name}</span></div>
                 </div>

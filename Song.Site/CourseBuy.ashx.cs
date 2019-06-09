@@ -16,10 +16,20 @@ namespace Song.Site
         private int couid = WeiSha.Common.Request.QueryString["couid"].Int32 ?? 0;
         protected override void InitPageTemplate(HttpContext context)
         {
+            //当前课程id写入cookies
+            if (couid > 0)
+            {
+                context.Response.Cookies.Add(new HttpCookie("couid", couid.ToString()));
+            }
+            else
+            {
+                couid = WeiSha.Common.Request.Cookies["couid"].Int32 ?? 0;
+            }
+            this.Document.Variables.SetValue("couid", couid);
             //判断，如果已经购买，则直接跳转
             if (Extend.LoginState.Accounts.IsLogin)
             {
-                bool isBuy = Business.Do<ICourse>().IsBuy(couid, Extend.LoginState.Accounts.CurrentUser.Ac_ID, 1);
+                bool isBuy = Business.Do<ICourse>().IsBuy(couid, Extend.LoginState.Accounts.CurrentUser.Ac_ID);
                 if (isBuy)
                 {                                    
                     this.Response.Redirect("/CourseStudy.ashx?couid=" + couid);
@@ -40,8 +50,9 @@ namespace Song.Site
                 if (!(course.Cou_FreeStart <= DateTime.Now && freeEnd >= DateTime.Now))
                     course.Cou_IsLimitFree = false;
             }
-            this.Document.Variables.SetValue("course", course);           
-            if (course == null) return;
+            if (course == null || !course.Cou_IsUse) return;
+            this.Document.Variables.SetValue("course", course);
+            
             //是否免费，限时免费也算
             this.Document.Variables.SetValue("isfree", course.Cou_IsFree || course.Cou_IsLimitFree);
             //所属专业
@@ -59,6 +70,10 @@ namespace Song.Site
             //上级专业
             List<Song.Entities.Subject> sbjs = Business.Do<ISubject>().Parents(course.Sbj_ID, true);
             this.Document.Variables.SetValue("sbjs", sbjs);
+            //支付接口
+            Song.Entities.Organization org = Business.Do<IOrganization>().OrganRoot();
+            Song.Entities.PayInterface[] pis = Business.Do<IPayInterface>().PayAll(org.Org_ID, "web", true);
+            this.Document.Variables.SetValue("pis", pis);
         }
               
     }

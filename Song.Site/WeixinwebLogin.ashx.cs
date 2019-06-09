@@ -87,7 +87,7 @@ namespace Song.Site
             openid = "";
             try
             {
-                string retjson = WeiSha.Common.Request.WebResult(url);
+                string retjson = WeiSha.Common.Request.HttpGet(url);
                 JObject jo = (JObject)JsonConvert.DeserializeObject(retjson);
                 string errcode = jo["errcode"] != null ? jo["errcode"].ToString() : string.Empty;  //错误代码
                 string errmsg = jo["errmsg"] != null ? jo["errmsg"].ToString() : string.Empty;
@@ -127,7 +127,7 @@ namespace Song.Site
         /// <returns></returns>
         protected string getOrganDomain(Song.Entities.Organization org)
         {
-            string root = WeiSha.Common.Request.Domain.MainName;
+            string root = WeiSha.Common.Server.MainName;
             return org.Org_TwoDomain + "." + root;
         }
         /// <summary>
@@ -140,7 +140,7 @@ namespace Song.Site
         {
             string userUrl = "https://api.weixin.qq.com/sns/userinfo?access_token={0}&openid={1}";
             userUrl = string.Format(userUrl, access_token, openid);
-            string retjson = WeiSha.Common.Request.WebResult(userUrl);
+            string retjson = WeiSha.Common.Request.HttpGet(userUrl);
             unionid = string.Empty;
             //解析QQ账户信息
             Song.Entities.Accounts acc = null;
@@ -173,11 +173,14 @@ namespace Song.Site
             this.Document.Variables.SetValue("openid", openid);
             this.Document.Variables.SetValue("token", token);
             //设置主域，用于js跨根域
-            if (!WeiSha.Common.Server.IsLocalIP) this.Document.Variables.SetValue("domain", WeiSha.Common.Request.Domain.MainName);
+            int multi = Business.Do<ISystemPara>()["MultiOrgan"].Int32 ?? 0;
+            if (multi == 0 && !WeiSha.Common.Server.IsLocalIP)
+                this.Document.Variables.SetValue("domain", WeiSha.Common.Server.MainName);
             //当前机构
             Song.Entities.Organization org = getOrgan(-1);
             this.Document.Variables.SetValue("org", org);
-            if (!WeiSha.Common.Server.IsLocalIP) this.Document.Variables.SetValue("domain", WeiSha.Common.Request.Domain.MainName);
+            if (multi == 0 && !WeiSha.Common.Server.IsLocalIP) 
+                this.Document.Variables.SetValue("domain", WeiSha.Common.Server.MainName);
             this.Document.SetValue("domain2", getOrganDomain(org));
             //获取帐户，如果已经注册，则直接实现登录
             string unionid = string.Empty;
@@ -238,34 +241,31 @@ namespace Song.Site
             int sex = WeiSha.Common.Request.Form["sex"].Int16 ?? 0;
             string name = WeiSha.Common.Request.Form["name"].String;
             string photo = WeiSha.Common.Request.Form["photo"].String;
-            Song.Entities.Organization org = getOrgan(-1);           
+            Song.Entities.Organization org = getOrgan(-1);
             //创建新账户
             //获取微信登录账户的信息
             string unionid = string.Empty;
-            Song.Entities.Accounts tmp = getUserInfo(token, openid, out unionid); 
-            if (tmp == null)
+            Song.Entities.Accounts tmp = getUserInfo(token, openid, out unionid);
+            if (tmp == null) tmp = new Entities.Accounts();
+            tmp.Ac_AccName = unionid;
+            tmp.Org_ID = org.Org_ID;
+            //头像图片           
+            string photoPath = Upload.Get["Accounts"].Physics + unionid + ".jpg";
+            WeiSha.Common.Request.LoadFile(photo, photoPath);
+            tmp.Ac_Photo = unionid + ".jpg";
+            //获取推荐人
+            int recid = WeiSha.Common.Request.Cookies["sharekeyid"].Int32 ?? 0;
+            Song.Entities.Accounts accRec = null;
+            if (accRec == null && recid > 0) accRec = Business.Do<IAccounts>().AccountsSingle(recid);
+            if (accRec != null && accRec.Ac_ID != tmp.Ac_ID)
             {
-                tmp = new Entities.Accounts();
-                tmp.Ac_AccName = unionid;
-                tmp.Org_ID = org.Org_ID;
-                //头像图片           
-                string photoPath = Upload.Get["Accounts"].Physics + unionid + ".jpg";
-                WeiSha.Common.Request.LoadFile(photo, photoPath);
-                tmp.Ac_Photo = unionid + ".jpg";
-                //获取推荐人
-                int recid = WeiSha.Common.Request.Cookies["sharekeyid"].Int32 ?? 0;
-                Song.Entities.Accounts accRec = null;
-                if (accRec == null && recid > 0) accRec = Business.Do<IAccounts>().AccountsSingle(recid);
-                if (accRec != null && accRec.Ac_ID != tmp.Ac_ID)
-                {
-                    tmp.Ac_PID = accRec.Ac_ID;  //设置推荐人，即：当前注册账号为推荐人的下线                   
-                    Business.Do<IAccounts>().PointAdd4Register(accRec);   //增加推荐人积分
-                }
-                //如果需要审核通过                
-                tmp.Ac_IsPass = tmp.Ac_IsUse = true;
-                int id = Business.Do<IAccounts>().AccountsAdd(tmp);
-                LoginState.Accounts.Write(tmp);
+                tmp.Ac_PID = accRec.Ac_ID;  //设置推荐人，即：当前注册账号为推荐人的下线                   
+                Business.Do<IAccounts>().PointAdd4Register(accRec);   //增加推荐人积分
             }
+            //如果需要审核通过                
+            tmp.Ac_IsPass = tmp.Ac_IsUse = true;
+            int id = Business.Do<IAccounts>().AccountsAdd(tmp);
+            LoginState.Accounts.Write(tmp);
             string domain = getOrganDomain(org);
             Response.Write("{\"success\":\"1\",\"name\":\"" + tmp.Ac_Name + "\",\"domain\":\"" + domain + "\",\"acid\":\"" + tmp.Ac_ID + "\",\"state\":\"1\"}");
         }

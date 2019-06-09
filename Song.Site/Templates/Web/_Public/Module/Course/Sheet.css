@@ -6,8 +6,8 @@
 }
 #couHead .headRight {
 	float: right;
-	height: 355px;
-	width: 540px;
+	height: 342px;
+	width: 560px;
 	position: relative;
 }
 #couHead .headRight span {
@@ -16,35 +16,37 @@
 }
 #couHead .photo {
 	float: left;
-	height: 360px;
-	width: 644px;
+	height: 337px;
+	width: 600px;
 }
 #couHead .photo img {
-	height: 350px;
-	width: 616px;
+	height: 337px;
+	width: 600px;
 	margin-top: 5px;
 	margin-left: 5px;
 	background-position: center top;
 	background-size: 100% !important
 }
-#couHead .headRight .couName {
-	font-family: "Microsoft YaHei", "微软雅黑", "MicrosoftJhengHei", "华文细黑", STHeiti, MingLiu;
+#couHead .headRight .couName {	
 	font-size: 30px;
 	line-height: 50px;
 	font-weight: bolder;
 	color: #000000;
 	display: table;
+	margin-bottom:10px;
 }
-#couHead .headRight .couIntro {
+#couHead .headRight .headrow{
 	font-size: 16px;
-	line-height: 25px;
-	max-height: 75px;
-	margin-top: 10px;
-	overflow: hidden;
-	margin-bottom: 10px;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 3;
+}
+.headinfo{
+	position: relative;
+	height:100px;
+	padding-left:90px;
+}
+#couHead .headRight #course-qrcode {
+	position: absolute;
+	top: 6px;
+	left: 0px;
 }
 .couIntro *, .couIntro a, .couIntro p, .couIntro div {
 	font-size: 16px !important;
@@ -93,7 +95,7 @@
 	background-color: #188eee;
 }
 .couBtn, .couBtn a {
-	font-family: "微软雅黑", "黑体", "Simplified Arabic Fixed";
+	
 	font-size: 22px;
 	line-height: 50px;
 	color: #FFFFFF;
@@ -154,7 +156,6 @@ background-color: transparent;
 }
 .title {
 	font-size: 20px;
-	font-family: "微软雅黑", "黑体", "Simplified Arabic Fixed";
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	float: left;
@@ -315,7 +316,6 @@ background-color: transparent;
 	overflow: hidden;
 }
 .thTop .thName, .thTop .thName a {
-	font-family: "微软雅黑", "黑体", "Simplified Arabic Fixed";
 	font-size: 18px;
 	line-height: 25px;
 	color: #333333;
@@ -415,6 +415,8 @@ background-color: transparent;
 	float: left;
 	width: 48%;
 	margin-bottom: 5px;
+	height: 30px;
+    overflow: hidden;
 }
 .stPhoto {
 	width: 25px;

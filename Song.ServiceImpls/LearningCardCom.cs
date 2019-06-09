@@ -358,20 +358,21 @@ namespace Song.ServiceImpls
         /// <summary>
         /// 使用该学习卡
         /// </summary>
-        /// <param name="entity"></param>
-        public void CardUse(LearningCard entity, Accounts acc)
+        /// <param name="card">学习卡</param>
+        /// <param name="acc">学员账号</param>
+        public void CardUse(LearningCard card, Accounts acc)
         {
-            if (entity.Lc_State != 0) throw new Exception("该学习卡已经使用");
-            LearningCardSet set = this.SetSingle(entity.Lcs_ID);
+            if (card.Lc_State != 0) throw new Exception("该学习卡已经使用");
+            LearningCardSet set = this.SetSingle(card.Lcs_ID);
             if (set == null || set.Lcs_IsEnable == false) throw new Exception("该学习卡不可使用");
             //是否过期
-            if (!(DateTime.Now > entity.Lc_LimitStart && DateTime.Now < entity.Lc_LimitEnd.Date.AddDays(1)))
+            if (!(DateTime.Now > card.Lc_LimitStart && DateTime.Now < card.Lc_LimitEnd.Date.AddDays(1)))
                 throw new Exception("该学习卡已经过期");
             //设置学习卡的使用信息
-            entity.Lc_UsedTime = DateTime.Now;
-            entity.Lc_State = 1;    //状态，0为初始，1为使用，-1为回滚
-            entity.Ac_ID = acc.Ac_ID;
-            entity.Ac_AccName = acc.Ac_AccName;
+            card.Lc_UsedTime = DateTime.Now;
+            card.Lc_State = 1;    //状态，0为初始，1为使用，-1为回滚
+            card.Ac_ID = acc.Ac_ID;
+            card.Ac_AccName = acc.Ac_AccName;
             using (DbTrans tran = Gateway.Default.BeginTrans())
             {
                 //学习时间的起始时间
@@ -387,21 +388,30 @@ namespace Song.ServiceImpls
                     foreach (Course cou in courses)
                     {
                         Song.Entities.Student_Course sc = null;
-                        sc = tran.From<Student_Course>().Where(Student_Course._.Ac_ID == entity.Ac_ID
+                        sc = tran.From<Student_Course>().Where(Student_Course._.Ac_ID == card.Ac_ID
                             && Student_Course._.Cou_ID == cou.Cou_ID).ToFirst<Student_Course>();
                         if (sc != null)
                         {
-                            //已经过期，则重新设置时间
-                            if (sc.Stc_EndTime < DateTime.Now)
-                            {                               
+                            //如果是免费或试用
+                            if (sc.Stc_IsFree || sc.Stc_IsTry)
+                            {
                                 sc.Stc_StartTime = start;
                                 sc.Stc_EndTime = end;
                             }
                             else
                             {
-                                //如果未过期，则续期
-                                sc.Stc_EndTime = sc.Stc_EndTime.AddDays(span);                                
-                            }
+                                //已经过期，则重新设置时间
+                                if (sc.Stc_EndTime < DateTime.Now)
+                                {
+                                    sc.Stc_StartTime = start;
+                                    sc.Stc_EndTime = end;
+                                }
+                                else
+                                {
+                                    //如果未过期，则续期                                
+                                    sc.Stc_EndTime = sc.Stc_EndTime.AddDays(span);
+                                }
+                            }                           
                         }
                         else
                         {
@@ -410,20 +420,21 @@ namespace Song.ServiceImpls
                             sc.Stc_StartTime = start;
                             sc.Stc_EndTime = end;
                         }
-                        sc.Ac_ID = entity.Ac_ID;
+                        sc.Ac_ID = card.Ac_ID;
                         sc.Cou_ID = cou.Cou_ID;
-                        sc.Stc_Money = entity.Lc_Price;                       
-                        sc.Org_ID = entity.Org_ID;
+                        sc.Stc_Money = card.Lc_Price;                       
+                        sc.Org_ID = card.Org_ID;
+                        sc.Stc_IsFree = sc.Stc_IsTry = false;
                         tran.Save<Student_Course>(sc);
                     }                    
                     //使用数量加1
                     set.Lsc_UsedCount = tran.Count<LearningCard>(LearningCard._.Lcs_ID == set.Lcs_ID && LearningCard._.Lc_IsUsed == true);
-                    set.Lsc_UsedCount = entity.Lc_IsUsed ? set.Lsc_UsedCount : set.Lsc_UsedCount + 1;
+                    set.Lsc_UsedCount = card.Lc_IsUsed ? set.Lsc_UsedCount : set.Lsc_UsedCount + 1;
                     tran.Save<LearningCardSet>(set);
                     //标注学习卡已经使用
-                    entity.Lc_IsUsed = true;
-                    entity.Lc_Span = span;  //记录学习卡使后，增加的学习时间（单位：天），方便回滚扣除                    
-                    tran.Save<LearningCard>(entity);
+                    card.Lc_IsUsed = true;
+                    card.Lc_Span = span;  //记录学习卡使后，增加的学习时间（单位：天），方便回滚扣除                    
+                    tran.Save<LearningCard>(card);
                     tran.Commit();
                 }
                 catch (Exception ex)
@@ -468,7 +479,17 @@ namespace Song.ServiceImpls
         /// </summary>
         /// <param name="entity"></param>
         public void CardRollback(LearningCard entity)
-        {            
+        {
+            CardRollback(entity,false);
+        }
+        /// <summary>
+        /// 学习卡使用后的回滚，将删除学员的关联课程
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="isclear">是否清理学习记录</param>
+        public void CardRollback(LearningCard entity, bool isclear)
+        {
+           
             //只是领用，但未使用
             if (entity.Lc_IsUsed && entity.Lc_State == 0)
             {
@@ -512,6 +533,7 @@ namespace Song.ServiceImpls
                             {
                                 //如果扣除学习卡增加的时间后，小于开始时间，则直接删除课程
                                 tran.Delete<Student_Course>(Student_Course._.Ac_ID == entity.Ac_ID && Student_Course._.Cou_ID == cou.Cou_ID);
+                                if (isclear) _cardRollback_clear(entity.Ac_ID, cou.Cou_ID);
                                 tran.Update<Accounts>(new Field[] { Accounts._.Ac_CurrCourse }, new object[] { -1 },
                                     Accounts._.Ac_ID == entity.Ac_ID && Accounts._.Ac_CurrCourse == cou.Cou_ID);
                             }
@@ -532,6 +554,18 @@ namespace Song.ServiceImpls
                     }
                 }
             }
+        }
+        private void _cardRollback_clear(int acc,int couid)
+        {
+            //学习记录
+            Gateway.Default.Delete<LogForStudentQuestions>(LogForStudentQuestions._.Ac_ID == acc && LogForStudentQuestions._.Cou_ID==couid);
+            Gateway.Default.Delete<LogForStudentStudy>(LogForStudentStudy._.Ac_ID == acc && LogForStudentStudy._.Cou_ID == couid);
+            //试题，收藏、笔记、错题
+            Gateway.Default.Delete<Student_Collect>(Student_Collect._.Ac_ID == acc && Student_Collect._.Cou_ID==couid);
+            Gateway.Default.Delete<Student_Notes>(Student_Notes._.Ac_ID == acc && Student_Notes._.Cou_ID == couid);
+            Gateway.Default.Delete<Student_Ques>(Student_Ques._.Ac_ID == acc && Student_Ques._.Cou_ID == couid);
+            //模拟测试
+            Gateway.Default.Delete<TestResults>(TestResults._.Ac_ID == acc && TestResults._.Cou_ID == couid);
         }
         /// <summary>
         /// 学习卡设置项下的所有学习卡
@@ -675,7 +709,7 @@ namespace Song.ServiceImpls
         }
         #endregion
 
-        #region 充值码生成
+        #region 生成
         /// <summary>
         /// 生成单个学习卡的编码
         /// </summary>

@@ -33,8 +33,10 @@ namespace Song.Site.Ajax
             }
             else
             {
-                Business.Do<IStudent>().LogForStudyFresh(couid, olid, student, playTime, studyTime, totalTime);
-                context.Response.Write("0");
+                if (totalTime <= 0) throw new Exception("视频总时长为零");
+                //记录学习进度，返回完成度的百分比
+                double per = Business.Do<IStudent>().LogForStudyUpdate(couid, olid, student, playTime, studyTime, totalTime);
+                context.Response.Write(per);
             }
         }
 

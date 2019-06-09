@@ -163,12 +163,7 @@ namespace Song.ServiceImpls
         {
             Song.Entities.Questions qus = QuestionsMethod.QuestionsCache.Singleton.GetSingle(identify);
             if (qus == null) qus = Gateway.Default.From<Questions>().Where(Questions._.Qus_ID == identify).ToFirst<Questions>();
-            if (qus == null) return qus;
-            if (!string.IsNullOrWhiteSpace(qus.Qus_Title))
-            {
-                qus.Qus_Title = qus.Qus_Title.Replace("&lt;", "<");
-                qus.Qus_Title = qus.Qus_Title.Replace("&gt;", ">");
-            }
+            if (qus == null) return qus;            
             return qus;
 
         }
@@ -179,8 +174,7 @@ namespace Song.ServiceImpls
             Song.Entities.Questions qus = QuestionsMethod.QuestionsCache.Singleton.GetSingle(uid);
             if (qus == null) qus = Gateway.Default.From<Questions>().Where(Questions._.Qus_UID == uid.Trim() && Questions._.Qus_IsTitle == true).ToFirst<Questions>();
             if (qus == null) return qus;
-            qus.Qus_Title = qus.Qus_Title.Replace("&lt;", "<");
-            qus.Qus_Title = qus.Qus_Title.Replace("&gt;", ">");
+           
             return qus;
         }
 
@@ -191,9 +185,7 @@ namespace Song.ServiceImpls
             if (type > 0) wc.And(Questions._.Qus_Type == type);
             if (titile.Trim() != "") wc.And(Questions._.Qus_Title.Like(titile.Trim()));
             Song.Entities.Questions qus = Gateway.Default.From<Questions>().Where(wc).ToFirst<Questions>();
-            if (qus == null) return qus;
-            qus.Qus_Title = qus.Qus_Title.Replace("&lt;", "<");
-            qus.Qus_Title = qus.Qus_Title.Replace("&gt;", ">");
+            if (qus == null) return qus;           
             return qus;
         }
 
@@ -205,7 +197,7 @@ namespace Song.ServiceImpls
 
         public Questions[] QuesCount(int type, bool? isUse, int count)
         {
-            WhereClip wc = new WhereClip();
+            WhereClip wc = Questions._.Qus_IsError == false && Questions._.Qus_IsWrong == false;
             if (type > 0) wc.And(Questions._.Qus_Type == type);
             if (isUse != null) wc.And(Questions._.Qus_IsUse == (bool)isUse);
             return Gateway.Default.From<Questions>().Where(wc)
@@ -951,6 +943,7 @@ namespace Song.ServiceImpls
         {
             if (string.IsNullOrWhiteSpace(xml)) return new QuesAnswer[0];
             XmlDocument xmlDoc = new XmlDocument();
+            if (!string.IsNullOrWhiteSpace(xml)) xml = xml.Trim();
             xmlDoc.LoadXml(xml, false);
             XmlNodeList list = xmlDoc.SelectNodes("Items/item");
             List<Song.Entities.QuesAnswer> anslist =new List<QuesAnswer>();
@@ -1302,7 +1295,7 @@ namespace Song.ServiceImpls
             this.OnSave(null, e);
             if (sender == null)
             {
-                Business.Do<IOutline>().OutlineBuildCache();
+                //Business.Do<IOutline>().OutlineBuildCache();
             }
             else
             {

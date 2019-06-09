@@ -24,7 +24,7 @@ namespace Song.Template.Tags.ListTag
             string search = this.Tag.Attributes.GetValue("search", "");         //检索字符
             //上级专业的id
             int pid = 0;
-            int.TryParse(this.Tag.Attributes.GetValue("pid", "0"), out pid);
+            int.TryParse(this.Tag.Attributes.GetValue("pid", "-1"), out pid);
             //排序方式，def默认排序（先推荐，后排序号），tax按排序号,rec按推荐
             string order = this.Tag.Attributes.GetValue("order", "def");
 
@@ -45,11 +45,14 @@ namespace Song.Template.Tags.ListTag
             if (string.IsNullOrWhiteSpace(from))
             {
                 Song.Entities.Subject[] sbjs = Business.Do<ISubject>().SubjectCount(this.Organ.Org_ID, search, true, pid, order, start, count);
-                //sbjs[0].child = 3;
+                string path = Upload.Get["Subject"].Virtual;
                 foreach (Song.Entities.Subject c in sbjs)
                 {
-                    c.Sbj_Logo = Upload.Get["Subject"].Virtual + c.Sbj_Logo;
-                    c.Sbj_LogoSmall = Upload.Get["Subject"].Virtual + c.Sbj_LogoSmall;
+                    c.Sbj_Logo = path + c.Sbj_Logo;
+                    c.Sbj_LogoSmall = path + c.Sbj_LogoSmall;
+                    //如果别名为空，则别名等于专业名称
+                    if (string.IsNullOrWhiteSpace(c.Sbj_ByName) || c.Sbj_ByName.Trim() == "")
+                        c.Sbj_ByName = c.Sbj_Name;
                     c.Sbj_Intro = HTML.ClearTag(c.Sbj_Intro);
                 }
                 tag.DataSourse = sbjs;

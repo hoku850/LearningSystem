@@ -237,7 +237,19 @@ namespace Song.ServiceImpls
         {
             return Gateway.Default.From<Examination>().Where(Examination._.Exam_ID == identify).ToFirst<Examination>();
         }
-
+        /// <summary>
+        /// 通过学员ID与考试ID，获取成绩（最好成绩）
+        /// </summary>
+        /// <param name="accid"></param>
+        /// <param name="examid"></param>
+        /// <returns></returns>
+        public ExamResults ResultSingle(int accid, int examid)
+        {
+            WhereClip wc = new WhereClip();
+            wc.And(ExamResults._.Ac_ID == accid);
+            wc.And(ExamResults._.Exam_ID == examid);
+            return Gateway.Default.From<ExamResults>().Where(wc).OrderBy(ExamResults._.Exr_Score.Desc).ToFirst<ExamResults>();
+        }
         public Examination ExamSingle(string uid)
         {
             return Gateway.Default.From<Examination>().Where(Examination._.Exam_UID == uid && Examination._.Exam_IsTheme == true).ToFirst<Examination>();
@@ -403,7 +415,7 @@ namespace Song.ServiceImpls
         }
         public ExamResults[] GetAttendPager(int stid, int sbjid, int orgid, string sear, int size, int index, out int countSum)
         {
-            WhereClip wc = new WhereClip();
+            WhereClip wc = ExamResults._.Exr_SubmitTime > DateTime.Now.AddYears(-100);
             if (stid > 0) wc.And(ExamResults._.Ac_ID == stid);
             if (sbjid > 0) wc.And(ExamResults._.Sbj_ID == sbjid);
             if (orgid > 0) wc.And(ExamResults._.Org_ID == orgid);
@@ -788,12 +800,12 @@ namespace Song.ServiceImpls
         /// <summary>
         /// 考试主题下的所有参考人员成绩
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">当前考试主题的ID</param>
         /// <param name="stsid">学生分组的id，为0时取所有，为-1时取不在组的学员，大于0则取当前组学员</param>
         /// <returns></returns>
-        public DataTable Result4Theme(int id, int stsid)
+        public DataTable Result4Theme(int examid, int stsid)
         {
-            Examination theme = this.ExamSingle(id);
+            Examination theme = this.ExamSingle(examid);
             Examination[] exams = this.ExamItem(theme.Exam_UID);    //当前考试下的多场考试
             DataTable dt = new DataTable("DataBase");
             //人员id与姓名
@@ -803,12 +815,14 @@ namespace Song.ServiceImpls
             dt.Columns.Add(new DataColumn("性别", typeof(string)));
             dt.Columns.Add(new DataColumn("身份证", typeof(string)));
             foreach (Examination ex in exams)
-                dt.Columns.Add(new DataColumn(ex.Exam_Name, Type.GetType("System.String")));
+            {
+                dt.Columns.Add(new DataColumn(ex.Exam_Name, Type.GetType("System.String")));               
+            }
             //取出所有的成绩
             WhereClip wc = ExamResults._.Exam_UID == theme.Exam_UID;
             if (stsid > 0) wc.And(ExamResults._.Sts_ID == stsid);   //取所有已分组的学员
             if (stsid < 0) wc.And(ExamResults._.Sts_ID <= 0);   //取所有未分组的学员
-            ExamResults[] results = Gateway.Default.From<ExamResults>().Where(wc).ToArray<ExamResults>();
+            ExamResults[] results = Gateway.Default.From<ExamResults>().Where(wc).OrderBy(ExamResults._.Exr_ScoreFinal.Desc).ToArray<ExamResults>();
             //计算成绩
             for (int i = 0; i < results.Length; i++)
             {
@@ -837,7 +851,7 @@ namespace Song.ServiceImpls
                     {
                         dr["账号"] = student.Ac_AccName;
                     }
-                    dr["性别"] = er.Ac_Sex==0 ? "未知" :(er.Ac_Sex==1 ? "男" : "女") ;
+                    dr["性别"] = er.Ac_Sex == 0 ? "未知" : (er.Ac_Sex == 1 ? "男" : "女");
                     dr["身份证"] = er.Ac_IDCardNumber;
                     dt.Rows.Add(dr);
                 }
@@ -851,8 +865,9 @@ namespace Song.ServiceImpls
                     {
                         if (er.Ac_ID == accid && er.Exam_ID == ex.Exam_ID)
                         {
-                            double score = Math.Floor(er.Exr_ScoreFinal * 1000) / 100;
-                            dt.Rows[i][ex.Exam_Name] = score.ToString();
+                            double score = Math.Floor(er.Exr_ScoreFinal * 100) / 100;
+                            //此处是两个数值（用$分隔），前面是成绩，后面是成绩记的id
+                            dt.Rows[i][ex.Exam_Name] = score.ToString() + "$" + er.Exr_ID;
                             break;
                         }
                     }
@@ -861,6 +876,67 @@ namespace Song.ServiceImpls
             DataView dv = dt.DefaultView;
             dv.Sort = "姓名 Asc";
             return dv.ToTable();
+        }
+        /// <summary>
+        /// 考试主题下的所有参考人员成绩
+        /// </summary>
+        /// <param name="id">当前考试主题的ID</param>
+        /// <param name="stsid">学生分组的id，多个组用逗号分隔</param>
+        /// <returns></returns>
+        public DataTable Result4Theme(int examid, string stsid)
+        {
+            DataTable dtFirst = null; 
+            foreach (string s in stsid.Split(','))
+            {
+                if (string.IsNullOrWhiteSpace(s)) continue;
+                int sid = 0;
+                int.TryParse(s, out sid);
+                //if (sid <= 0) continue;
+                //取每个组的学员的考试成绩
+                DataTable dtSecond = this.Result4Theme(examid, sid);
+                if (dtSecond == null) continue;
+                if (dtFirst == null || dtFirst.Rows.Count < 1) dtFirst = dtSecond;
+                if (!dtFirst.Equals(dtSecond))
+                {
+                    //将两个表都存在的数据，合并
+                    for (int i = 0; i < dtFirst.Rows.Count; i++)
+                    {
+                        DataRow dr1 = dtFirst.Rows[i];                        
+                        foreach (DataRow dr2 in dtSecond.Rows)
+                        {
+                            if (dr1["ID"].ToString() == dr2["ID"].ToString())
+                            {
+                                for (var n = 0; n < dr1.ItemArray.Length; n++)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(dr2[n].ToString()))
+                                        dr1[n] = dr2[n];
+                                }                                
+                            }
+                        }                        
+                    }
+                    //如果第二个表比第一个表多，则添加
+                    foreach (DataRow dr2 in dtSecond.Rows)
+                    {
+                        bool isExist = false;
+                        foreach (DataRow dr1 in dtFirst.Rows)
+                        {                            
+                            if (dr1["ID"].ToString() == dr2["ID"].ToString())
+                            {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if (!isExist)
+                        {
+                            DataRow drnew = dtFirst.NewRow();
+                            for (var n = 0; n < drnew.ItemArray.Length; n++)                            
+                                drnew[n] = dr2[n];                            
+                            dtFirst.Rows.Add(drnew);
+                        }
+                    }
+                }
+            }
+            return dtFirst;
         }
         /// <summary>
         /// 考试主题下的所有参考人员成绩
@@ -883,7 +959,9 @@ namespace Song.ServiceImpls
             dt.Columns.Add(new DataColumn("性别", typeof(string)));
             dt.Columns.Add(new DataColumn("身份证", typeof(string)));
             foreach (Examination ex in exams)
-                dt.Columns.Add(new DataColumn(ex.Exam_Name, typeof(float)));
+            {
+                dt.Columns.Add(new DataColumn(ex.Exam_Name, typeof(string)));               
+            }
             //取学员
             WhereClip wcAcc = Accounts._.Org_ID == theme.Org_ID;
             if (stsid > 0) wcAcc.And(Accounts._.Sts_ID == stsid);   //取所有已分组的学员
@@ -974,7 +1052,7 @@ namespace Song.ServiceImpls
             dv.Sort = "平均分 Desc";
             DataTable dt2 = dv.ToTable();
             return dt2;
-        }
+        }        
         ///// <summary>
         ///// 统计各院系在某个考试中的平均分
         ///// </summary>
@@ -1154,7 +1232,7 @@ namespace Song.ServiceImpls
         }
         public ExamResults[] Results(int examid, int size, int index, out int countSum)
         {
-            WhereClip wc = ExamResults._.Exam_ID == examid;          
+            WhereClip wc = ExamResults._.Exam_ID == examid && ExamResults._.Exr_SubmitTime > DateTime.Now.AddYears(-100);          
             countSum = Gateway.Default.Count<ExamResults>(wc);
             ExamResults[] exr = Gateway.Default.From<ExamResults>().Where(wc).OrderBy(ExamResults._.Exr_CrtTime.Desc).ToArray<ExamResults>(size, (index - 1) * size);
             for (int i = 0; i < exr.Length; i++)
@@ -1167,7 +1245,7 @@ namespace Song.ServiceImpls
 
         public ExamResults[] Results(string examuid, int size, int index, out int countSum)
         {
-            WhereClip wc = ExamResults._.Exam_UID == examuid;
+            WhereClip wc = ExamResults._.Exam_UID == examuid && ExamResults._.Exr_SubmitTime > DateTime.Now.AddYears(-100);
             countSum = Gateway.Default.Count<ExamResults>(wc);
             ExamResults[] exr = Gateway.Default.From<ExamResults>().Where(wc).OrderBy(ExamResults._.Exr_CrtTime.Desc).ToArray<ExamResults>(size, (index - 1) * size);
             for (int i = 0; i < exr.Length; i++)
@@ -1185,7 +1263,7 @@ namespace Song.ServiceImpls
         /// <returns></returns>
         public ExamResults[] Results(int examid, int count)
         {
-            WhereClip wc = ExamResults._.Exam_ID == examid;
+            WhereClip wc = ExamResults._.Exam_ID == examid && ExamResults._.Exr_SubmitTime > DateTime.Now.AddYears(-100);
             ExamResults[] exr = Gateway.Default.From<ExamResults>().Where(wc).OrderBy(ExamResults._.Exr_CrtTime.Desc).ToArray<ExamResults>();
             for (int i = 0; i < exr.Length; i++)
             {

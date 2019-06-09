@@ -20,6 +20,16 @@ namespace Song.Site.Mobile
         {
             Song.Entities.Course course = Business.Do<ICourse>().CourseSingle(couid);
             if (course == null) return;
+            //记录当前学习的课程
+            Extend.LoginState.Accounts.Course(course);
+            #region 创建与学员的关联
+            if (this.Account != null)
+            {
+                int accid = this.Account.Ac_ID;
+                bool istudy = Business.Do<ICourse>().Study(couid,accid);              
+            }
+            #endregion
+
             //是否免费，或是限时免费
             if (course.Cou_IsLimitFree)
             {
@@ -45,7 +55,7 @@ namespace Song.Site.Mobile
                 }
                 this.Document.Variables.SetValue("isBuy", isBuy);
                 //是否可以学习,如果是免费或已经选修便可以学习，否则当前课程允许试用且当前章节是免费的，也可以学习
-                bool canStudy = isBuy || course.Cou_IsFree || course.Cou_IsLimitFree ;             
+                bool canStudy = isBuy || course.Cou_IsFree || course.Cou_IsLimitFree || course.Cou_IsTry;             
                 this.Document.Variables.SetValue("canStudy", canStudy);
             }
             //树形章节输出
@@ -77,7 +87,7 @@ namespace Song.Site.Mobile
                 int.TryParse(id[0].ToString(), out couid);
             if (this.Account != null)
             {
-                return Business.Do<ICourse>().StudyCourse(this.Account.Ac_ID, couid);
+                return Business.Do<ICourse>().StudentCourse(this.Account.Ac_ID, couid);
             }
             return null;
         }   

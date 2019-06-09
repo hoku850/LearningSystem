@@ -2,11 +2,20 @@
 @page {
  size: A4 portrait;
  margin:2cm;
+ margin-top:1cm;
+ margin-bottom:1cm;
 }
 @media all {
 .page {
-	page-break-inside: avoid;
+
 	position:relative;
+}
+.page-title{
+	height: 40px;
+	line-height: 30px;
+	text-align: center;
+	font-size: 25px;
+	font-weight: bold;
 }
 select {
 	display: none;
@@ -17,6 +26,7 @@ select {
 	z-index:1000;
 	opacity:0.8;
 	filter:alpha(opacity=80); 
+	page-break-inside: avoid;
 }
 
 .left-top{
@@ -40,7 +50,18 @@ table {
 	max-width: 100%;
 	margin-right: auto;
 	margin-left: auto;
-	page-break-before: auto;
+	--page-break-before: auto;	
+}
+table.first{
+	border-bottom-style: none;
+}
+table.second{
+	border-bottom-style: none;
+	border-top-style: none;
+}
+table.three{
+	border-top-style: none;
+	page-break-after:always;
 }
 table td {
 	height: 35px !important;
@@ -69,17 +90,23 @@ table td.center {
 table td.left {
 	text-indent: 10px;
 }
+.txtrow{
+	font-size: 13px;
+	white-space: nowrap;	
+}
 .intro {
 	height: 400px;
 }
 /**/
 table.firtst {
 	page-break-after: avoid;
+	height:29cm;
 }
 /*课程学习情况*/
 .rtpLearnInfo {
-	min-height:400px;
+	min-height:360px;
 	padding:10px;
+	margin-bottom:120px;	
 }
 .rtpLearnInfo dt, dd{
 	line-height:35px;	
@@ -102,6 +129,7 @@ table.firtst {
 /*课程详情区域*/
 .info-area{
 	position:relative;
+	page-break-inside: avoid;
 }
 .info-foot{
 	position:absolute;
@@ -118,5 +146,11 @@ table.firtst {
 	font-size:16px;
 	line-height:40px;
 	text-align:right;
+}
+/*二维码*/
+.qrcode{
+	position:absolute;
+	left:20px;
+	bottom:15px;
 }
 }

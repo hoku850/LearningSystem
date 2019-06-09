@@ -20,6 +20,10 @@ namespace Song.Extend
     public class CustomPage : System.Web.UI.Page
     {
         /// <summary>
+        /// 系统版本号
+        /// </summary>
+        protected static string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        /// <summary>
         /// 常用脚本,如alert等
         /// </summary>
         public Extend.Scripts Scripts
@@ -59,18 +63,18 @@ namespace Song.Extend
             Page.Header.Controls.Add(new System.Web.UI.LiteralControl("\r\n"));
             foreach (string file in scriptFile)
             {
-                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<script type=\"text/javascript\" src=\""+scriptPath+file+"\"></script>\r\n"));
+                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<script type=\"text/javascript\" src=\""+scriptPath+file+"?ver=" + version + "\"></script>\r\n"));
             }
             //插入对应的css文件与js文件
             string name = WeiSha.Common.Request.Page.Name;
-            if(System.IO.File.Exists(WeiSha.Common.Request.Page.PhysicsPath+"styles/public.css"))
-                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"styles/public.css\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
+            if (System.IO.File.Exists(WeiSha.Common.Request.Page.PhysicsPath + "styles/public.css"))
+                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"styles/public.css?ver=" + version + "\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
             //字体库
-            Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"/Utility/iconfont/iconfont.css\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
+            Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"/Utility/iconfont/iconfont.css?ver=" + version + "\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
             if (System.IO.File.Exists(WeiSha.Common.Request.Page.PhysicsPath + "styles/"+ name+".css" ))
-                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"styles/" + name + ".css\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
+                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<link href=\"styles/" + name + ".css?ver=" + version + "\" type=\"text/css\" rel=\"stylesheet\" />\r\n"));
             if (System.IO.File.Exists(WeiSha.Common.Request.Page.PhysicsPath + "scripts/"+name+".js"))
-                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<script type=\"text/javascript\" src=\"scripts/" + name + ".js\"></script>\r\n"));
+                Page.Header.Controls.Add(new System.Web.UI.LiteralControl("<script type=\"text/javascript\" src=\"scripts/" + name + ".js?ver=" + version + "\"></script>\r\n"));
             //Response.Write(Extend.ManageSession.Session.Name);
             #region 验证是否登录
 
@@ -160,6 +164,73 @@ namespace Song.Extend
             alert = alert.Replace("\r","");
             alert = alert.Replace("\n", "");
             new Extend.Scripts(this).Alert(alert);
+        }
+        /// <summary>
+        /// 利用JavaScript显示提示,提示完，关闭窗口，一般用于弹出窗口完成后的提示
+        /// </summary>
+        /// <param name="say"></param>
+        public void AlertAndClose(string say)
+        {
+            if (!string.IsNullOrWhiteSpace(say) && say.Trim() != "")
+            {
+                say = say.Replace("\r", "\n");
+                say = "<script type=\"text/javascript\">alert(\"" + say + "\");new top.PageBox().Close();</script>";
+                //ScriptManager.RegisterClientScriptBlock(this.Page, typeof(UpdatePanel), "Alert", say, true);
+                Page.ClientScript.RegisterStartupScript(typeof(string), "alert", say);
+                //Page.ClientScript.RegisterClientScriptBlock(typeof(string), "alert", say); 
+            }
+            else
+            {
+                this.Close();
+            }
+        }
+        /// <summary>
+        /// 利用JavaScript显示提示,提示完，关闭窗口，一般用于弹出窗口完成后的提示
+        /// </summary>
+        /// <param name="say"></param>
+        public void AlertCloseAndRefresh(string say)
+        {
+            if (!string.IsNullOrWhiteSpace(say) && say.Trim() != "")
+            {
+                say = say.Replace("\r", "\n");
+                say = "<script type=\"text/javascript\">alert(\"" + say + "\"); window.top.PageBox.CloseAndRefresh(window.name);</script>";
+                //ScriptManager.RegisterClientScriptBlock(this.Page, typeof(UpdatePanel), "Alert", say, true);
+                Page.ClientScript.RegisterStartupScript(typeof(string), "alert", say);
+            }
+            else
+            {
+                this.Close();
+            }
+        }
+        /// <summary>
+        /// 利用JavaScript显示提示,提示完，关闭窗口，
+        /// </summary>
+        /// <param name="say"></param>
+        public void Close(string say)
+        {
+            if (!string.IsNullOrWhiteSpace(say) && say.Trim() != "")
+            {
+                say = say.Replace("\r", "\n");
+                say = "<script type=\"text/javascript\">alert(\"" + say + "\");new top.PageBox().CloseAndRefresh();</script>";
+                //ScriptManager.RegisterClientScriptBlock(this.Page, typeof(UpdatePanel), "Alert", say, true);
+            }
+            else
+            {
+                say = "<script type=\"text/javascript\">new top.PageBox().CloseAndRefresh();</script>";
+                //ScriptManager.RegisterClientScriptBlock(this.Page, typeof(UpdatePanel), "Alert", say, true);
+            }
+            Page.ClientScript.RegisterStartupScript(typeof(string), "close", say);
+        }
+        /// <summary>
+        /// 关闭窗口，
+        /// </summary>
+        public void Close()
+        {
+            string say = "";
+            say = "<script type=\"text/javascript\">new top.PageBox().Close();</script>";
+            //ScriptManager.RegisterClientScriptBlock(this.Page, typeof(UpdatePanel), "Alert", say, true);
+            Page.ClientScript.RegisterStartupScript(typeof(string), "close", say);
+
         }
         /// <summary>
         /// 执行js脚本方法

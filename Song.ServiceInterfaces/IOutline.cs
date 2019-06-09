@@ -42,6 +42,18 @@ namespace Song.ServiceInterfaces
         /// <param name="entity">业务实体</param>
         void OutlineSave(Outline entity);
         /// <summary>
+        /// 导入章节，导入时不立即生成缓存
+        /// </summary>
+        /// <param name="entity"></param>
+        void OutlineInput(Outline entity);
+        /// <summary>
+        /// 导出课程章节到Excel
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="couid">课程ID</param>
+        /// <returns></returns>
+        string OutlineExport4Excel(string path, int couid);
+        /// <summary>
         /// 删除章节
         /// </summary>
         /// <param name="entity">业务实体</param>
@@ -63,6 +75,13 @@ namespace Song.ServiceInterfaces
         /// <param name="uid">全局唯一值</param>
         /// <returns></returns>
         Outline OutlineSingle(string uid);
+        /// <summary>
+        /// 获取某个课程内的章节，按级别取
+        /// </summary>
+        /// <param name="couid">课程ID</param>
+        /// <param name="names">多级名称</param>
+        /// <returns></returns>
+        Outline OutlineSingle(int couid, List<string> names);        
         /// <summary>
         /// 当前章节下的所有子章节id
         /// </summary>
@@ -96,15 +115,21 @@ namespace Song.ServiceInterfaces
         /// <returns></returns>
         DataTable OutlineTree(Song.Entities.Outline[] outlines);
         /// <summary>
-        /// 清除章节下试题
+        /// 清空章节下试题和附件
         /// </summary>
         /// <param name="identify"></param>
         void OutlineClear(int identify);
         /// <summary>
-        /// 构建缓存
+        /// 清理无效章节
         /// </summary>
+        /// <param name="couid">课程ID</param>
         /// <returns></returns>
-        List<Outline> OutlineBuildCache();
+        int OutlineCleanup(int couid);
+        ///// <summary>
+        ///// 构建缓存
+        ///// </summary>
+        ///// <returns></returns>
+        //List<Outline> OutlineBuildCache();
         /// <summary>
         /// 获取指定个数的课程列表
         /// </summary>
@@ -142,6 +167,16 @@ namespace Song.ServiceInterfaces
         /// <returns></returns>
         int OutlineOfCount(int couid, int pid, bool? isUse);
         int OutlineOfCount(int orgid, int sbjid, int couid, int pid, bool? isUse);
+        /// <summary>
+        /// 当前课程下的章节数
+        /// </summary>
+        /// <param name="couid">课程id</param>
+        /// <param name="pid">父id</param>
+        /// <param name="isUse">是否启用</param>
+        /// <param name="isVideo">是否有视频</param>
+        /// <param name="isFinish">章节是否完节</param>
+        /// <returns></returns>
+        int OutlineOfCount(int couid, int pid, bool? isUse, bool? isVideo, bool? isFinish);
         /// <summary>
         /// 是否有子级章节
         /// </summary>

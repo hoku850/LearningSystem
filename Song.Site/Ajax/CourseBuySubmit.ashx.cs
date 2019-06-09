@@ -98,19 +98,11 @@ namespace Song.Site.Ajax
                 return;
             }
             else
-            {
-                //生成学员与课程的关联
-                Song.Entities.Student_Course sc = Business.Do<ICourse>().StudyCourse(st.Ac_ID, couid);
-                if (sc == null) sc = new Entities.Student_Course();
-                sc.Cou_ID = couid;
-                sc.Ac_ID = st.Ac_ID;
-                sc.Stc_StartTime = DateTime.Now;
-                sc.Stc_EndTime = DateTime.Now.AddYears(101);
-                sc.Stc_IsFree = true;
-                sc.Stc_IsTry = false;
+            {                
                 try
                 {
-                    Business.Do<ICourse>().Buy(sc);
+                    //生成学员与课程的关联
+                    Song.Entities.Student_Course sc = Business.Do<ICourse>().FreeStudy(st.Ac_ID, couid);
                     Extend.LoginState.Accounts.Course(course);
                     Context.Response.Write(getBackJson(0, sc, null));
                     return;
@@ -129,14 +121,14 @@ namespace Song.Site.Ajax
         /// <param name="st"></param>
         private void Buy(Song.Entities.Course course, Song.Entities.Accounts st)
         {
-            //取图片验证码
-            string imgCode = WeiSha.Common.Request.Cookies["buycode"].ParaValue;
-            //验证码不正确
-            if (veriCode != imgCode)
-            {
-                Context.Response.Write(getBackJson(2, null, null));
-                return;
-            }
+            ////取图片验证码
+            //string imgCode = WeiSha.Common.Request.Cookies["buycode"].ParaValue;
+            ////验证码不正确
+            //if (veriCode != imgCode)
+            //{
+            //    Context.Response.Write(getBackJson(2, null, null));
+            //    return;
+            //}
             //价格项
             Song.Entities.CoursePrice price = Business.Do<ICourse>().PriceSingle(cpid);
             if (price == null)
@@ -149,7 +141,7 @@ namespace Song.Site.Ajax
             int coupon = st.Ac_Coupon;      //卡券余额
             int mprice = price.CP_Price;    //价格，所需现金
             int cprice = price.CP_Coupon;   //价格，可以用来抵扣的卡券
-            bool tm = money >= mprice || (money >= (mprice - cprice) && (coupon >= cprice));
+            bool tm = money >= mprice || money >= (mprice - (coupon > cprice ? cprice : coupon));
             if (!tm)
             {
                 Context.Response.Write(getBackJson(5, null, null));

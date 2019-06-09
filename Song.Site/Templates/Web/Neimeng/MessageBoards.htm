@@ -4,8 +4,8 @@
 <title>知识库 - {$org.org_platformname}</title>
 <vt:include file="inc/meta.inc" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!--<script type="text/javascript" src="Scripts/MessageBoards.js"></script>-->
-<link href="Styles/MessageBoards.css" rel="stylesheet" type="text/css" />
+<!--<script type="text/javascript" src="Scripts/MessageBoards.js?ver={$version}"></script>-->
+<link href="Styles/MessageBoards.css?ver={$version}" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -17,7 +17,7 @@
       <div class="item">
         <div class="mLeft">
           
-          <img src='/Upload/Student/{$:#.data.ac_photo}' />
+          <img src='/Upload/Student/{$:#.data.ac_photo}'  default="images/nophoto.jpg" />
           <div class="accname"> {$:#.data.ac_name} </div>
           <div class="crttime"> {$:#.data.Mb_CrtTime  format="yyyy-M-dd HH:mm:ss"} </div>
         </div>

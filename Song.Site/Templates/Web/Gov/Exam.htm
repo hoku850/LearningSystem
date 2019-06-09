@@ -3,8 +3,8 @@
 <head>
 <title>考试信息 -- {$org.org_platformname}</title>
 <vt:include file="inc/meta.inc" />
-<link href="Styles/exam.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="Scripts/exam.js"></script>
+<link href="Styles/exam.css?ver={$version}" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="Scripts/exam.js?ver={$version}"></script>
 </head>
 <body>
 <vt:include  file="inc/Header.html" />
@@ -30,7 +30,7 @@
               <vt:if var="paper.Tp_Logo" value="" compare="="> <img src="images/testpaper.jpg"/>
                 <vt:else />
                  <vt:function var="path" method="Path" args="TestPaper"/>
-                <img src="{$path}{$:#.paper.Tp_Logo}"/> </vt:if>
+                <img src="{$path}{$:#.paper.Tp_Logo}" default="images/testpaper.jpg"/> </vt:if>
             </div>
               <div class="itemTitle">
                 <div class="itemName">{$tax}.《<span>{$:e.Exam_name}</span>》</div>
@@ -95,7 +95,7 @@
               <vt:if var="paper.Tp_Logo" value="" compare="="> <img src="images/testpaper.jpg"/>
                 <vt:else />
                  <vt:function var="path" method="Path" args="TestPaper"/>
-                <img src="{$path}{$:#.paper.Tp_Logo}"/> </vt:if>
+                <img src="{$path}{$:#.paper.Tp_Logo}" default="images/testpaper.jpg"/> </vt:if>
             </div>
                   <div class="itemTitle">
                     <div class="itemTax">第（{$:j}）场</div>

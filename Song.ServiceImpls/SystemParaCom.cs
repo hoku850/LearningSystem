@@ -105,12 +105,21 @@ namespace Song.ServiceImpls
         /// </summary>
         public List<SystemPara> Refresh()
         {
-            WeiSha.Common.Cache<Song.Entities.SystemPara>.Data.Clear();
-            SystemPara[] syspara = Gateway.Default.From<SystemPara>().OrderBy(SystemPara._.Sys_Key.Asc).ToArray<SystemPara>();
-            foreach (Song.Entities.SystemPara p in syspara)
-                WeiSha.Common.Cache<Song.Entities.SystemPara>.Data.Add(p);
-            List<SystemPara> list = WeiSha.Common.Cache<SystemPara>.Data.List;
-            return list;
+            try
+            {
+                WeiSha.Common.Cache<Song.Entities.SystemPara>.Data.Clear();
+            }
+            catch
+            {
+            }
+            finally
+            {
+                SystemPara[] syspara = Gateway.Default.From<SystemPara>().OrderBy(SystemPara._.Sys_Key.Asc).ToArray<SystemPara>();
+                foreach (Song.Entities.SystemPara p in syspara)
+                    WeiSha.Common.Cache<Song.Entities.SystemPara>.Data.Add(p);
+                List<SystemPara> list = WeiSha.Common.Cache<SystemPara>.Data.List;                
+            }
+            return WeiSha.Common.Cache<SystemPara>.Data.List;
         }
         /// <summary>
         /// 删除
@@ -344,6 +353,16 @@ namespace Song.ServiceImpls
         public object ScalarSql(string sql)
         {
             return Gateway.Default.FromSql(sql).ToScalar();
+        }
+        /// <summary>
+        /// 执行sql语句，返回第一行
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public T ScalarSql<T>(string sql) where T : WeiSha.Data.Entity
+        {
+            return Gateway.Default.FromSql(sql).ToFirst<T>();
         }
         /// <summary>
         /// 执行sql语句

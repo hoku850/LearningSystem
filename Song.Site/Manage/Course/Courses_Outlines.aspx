@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Manage/Course/CourseEdit.Master"
+﻿<%@ Page Language="C#" MasterPageFile="~/Manage/Course/CourseEdit.Master" Title="课程章节"
     AutoEventWireup="true" CodeBehind="Courses_Outlines.aspx.cs" Inherits="Song.Site.Manage.Course.Courses_Outlines" %>
 
 <%@ MasterType VirtualPath="~/Manage/Course/CourseEdit.Master" %>
@@ -10,7 +10,7 @@
     <div loyout="row" height="30">
        <uc2:toolsBar ID="ToolsBar1" runat="server" WinPath="Outline_Edit.aspx"
            AddButtonOpen="true" GvName="GridView1" WinWidth="80"  DelButtonVisible="false"
-            WinHeight="80" InputButtonVisible="true" OutputButtonVisible="false" />
+            WinHeight="80" InputButtonVisible="false" OutputButtonVisible="false" />
        <%-- <asp:Button ID="btnAdd" runat="server" Text="新增" CssClass="btnAdd toolsBtn outlineName" />--%></div>
     <div loyout="row" overflow="auto">
         <cc1:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" SelectBoxKeyName="SelectBox"
@@ -49,6 +49,12 @@
                     </HeaderTemplate>
                     <ItemStyle CssClass="left" />
                 </asp:TemplateField>
+                <asp:TemplateField HeaderText="试题数">
+                    <ItemTemplate>
+                      <%# Eval("Ol_QuesCount", "{0}")%>
+                    </ItemTemplate>                   
+                    <ItemStyle CssClass="center" Width="60px" />
+                </asp:TemplateField>
                 <asp:TemplateField HeaderText="编辑">
                     <ItemTemplate>
                         <a href="Outline_Edit.aspx?id=<%# Eval("Ol_ID", "{0}")%>&couid=<%=couid %>" type="open">编辑</a>
@@ -64,7 +70,9 @@
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="内容">
                     <ItemTemplate>
-                         <a href="Outline_Video.aspx?id=<%# Eval("Ol_ID", "{0}")%>&uid=<%# Eval("Ol_UID", "{0}")%>&couid=<%=couid %>" type="open">视频</a>
+                         <a href="Outline_Video.aspx?id=<%# Eval("Ol_ID", "{0}")%>&uid=<%# Eval("Ol_UID", "{0}")%>&couid=<%=couid %>" type="open">
+                         <%# Eval("Ol_IsVideo", "{0}") == "True" ? "<b>视频</b>" : "视频"%>
+                         </a>
                         <a href="Outline_Accessory.aspx?id=<%# Eval("Ol_ID", "{0}")%>&uid=<%# Eval("Ol_UID", "{0}")%>" type="open">附件</a>
                     </ItemTemplate>
                     <EditItemTemplate>

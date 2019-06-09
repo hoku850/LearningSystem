@@ -3,12 +3,12 @@
 <head>
 <title>新闻资讯-{$:#.org.org_platformname}</title>
 <vt:include file="inc/meta.inc" />
-<link href="Styles/News.css" rel="stylesheet" type="text/css" />
+<link href="Styles/News.css?ver={$version}" rel="stylesheet" type="text/css" />
 
-<!--<script type="text/javascript" src="Scripts/News.js"></script>-->
-<script type="text/javascript" src="Scripts/jquery.luara.0.0.1.min.js"></script>
-<link rel="stylesheet" href="Styles/lunhuan/style.css"/>
-<link rel="stylesheet" href="Styles/lunhuan/luara.left.css"/>
+<!--<script type="text/javascript" src="Scripts/News.js?ver={$version}"></script>-->
+<script type="text/javascript" src="Scripts/jquery.luara.0.0.1.min.js?ver={$version}"></script>
+<link rel="stylesheet" href="Styles/lunhuan/style.css?ver={$version}"/>
+<link rel="stylesheet" href="Styles/lunhuan/luara.left.css?ver={$version}"/>
 </head>
 <body>
 <vt:include file="inc/Header.html" />
@@ -42,7 +42,7 @@
                 <script>
         $(function(){
             <!--调用Luara示例-->
-            $(".example2").luara({width:"500",height:"317",interval:4500,selected:"seleted",deriction:"left"});
+            $(".example2").luara({width:"500",height:"310",interval:4500,selected:"seleted",deriction:"left"});
 
         });
                 </script>
@@ -68,7 +68,7 @@
 <div id="Context">
 
   
-   <vt:list type="columns" ctype="news" item="m" index="i">
+   <vt:list type="columns" ctype="news" item="m" count="12"  index="i">
   <div class="order box" >
       <div class="boxTit"> <span class="txt">{$:m.col_name}</span> <span class="more"><a href="/newslist.ashx?colid={$:m.col_id}">更多&gt;&gt;</a></span> </div>
       <div class="orderAreaBox"> </div>
@@ -89,11 +89,11 @@
 <div id="Context">
  <!--热门课程--> 
   <div class="hotCour box" >
-      <div class="boxTit"> <span class="txt">热门课程</span> <span class="more"><a href="/courses.ashx">更多&gt;&gt;</a></span> </div>
+      <div class="boxTit"> <span class="txt">热门课程</span> <span class="more"><a href="/CourseChannel.ashx">更多&gt;&gt;</a></span> </div>
       <div class="courseList">
         <div class="courseListInner">
           <vt:list type="course" item="data" index="i" count="6" order="flux"  remark="课程">
-            <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}" /> </a>
+            <div class="item" couid="{$:#.data.cou_id}" wd="800" hg="600"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}"><img src="{$:#.data.cou_logosmall}"  default="images/cou_nophoto.jpg" /> </a>
               <div class="itemInfo"> <a href="/course.ashx?id={$:#.data.cou_id}" title="{$:#.data.cou_name}">{$:#.data.cou_name} </a>
                 <div class="itemDetails">主讲：{$:#.data.th_name}</div>
               </div>

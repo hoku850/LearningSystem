@@ -132,7 +132,7 @@ namespace Song.ServiceInterfaces
         /// <summary>
         /// 判断账号是否存在
         /// </summary>
-        /// <param name="accname"></param>
+        /// <param name="accname">账号名</param>
         /// <returns></returns>
         Accounts IsAccountsExist(string accname);
         /// <summary>
@@ -241,7 +241,7 @@ namespace Song.ServiceInterfaces
         string AccountsExport4Excel(string path, string orgs);
         #endregion
 
-        #region 下级账户
+        #region 下级账户，上级账户
         /// <summary>
         /// 下级会员数据
         /// </summary>
@@ -249,6 +249,26 @@ namespace Song.ServiceInterfaces
         /// <param name="isAll">是否包括所有下级，true是所有，false只取直接下级</param>
         /// <returns></returns>
         int SubordinatesCount(int acid, bool isAll);
+        /// <summary>
+        /// 下级会员分页获取
+        /// </summary>
+        /// <param name="acid">当前账号id</param>
+        /// <param name="isUse">是否启用</param>
+        /// <param name="acc"></param>
+        /// <param name="name"></param>
+        /// <param name="phone"></param>
+        /// <param name="size"></param>
+        /// <param name="index"></param>
+        /// <param name="countSum"></param>
+        /// <returns></returns>
+        Accounts[] SubordinatesPager(int acid, bool? isUse, string acc, string name, string phone, int size, int index, out int countSum);
+        /// <summary>
+        /// 当前账户的所有父级账户，依次向上
+        /// </summary>
+        /// <param name="accid">当前账户id</param>
+        /// <returns></returns>
+        Accounts[] Parents(int accid);
+        Accounts[] Parents(Accounts acc);
         #endregion
 
         #region 积分管理
@@ -262,7 +282,8 @@ namespace Song.ServiceInterfaces
         /// </summary>
         /// <param name="acc">学员账户</param>
         /// <returns></returns>
-        void PointAdd4Login(Accounts acc);
+        /// <returns>此次登录所增加的积分数</returns>
+        int PointAdd4Login(Accounts acc);
         /// <summary>
         /// 增加登录积分
         /// </summary>
@@ -270,19 +291,20 @@ namespace Song.ServiceInterfaces
         /// <param name="source">来源信息</param>
         /// <param name="info">信息</param>
         /// <param name="remark">备注</param>
-        void PointAdd4Login(Accounts acc,string source,string info,string remark);
+        /// <returns>此次登录所增加的积分数</returns>
+        int PointAdd4Login(Accounts acc,string source,string info,string remark);
         /// <summary>
         /// 增加分享链接的访问积分
         /// </summary>
         /// <param name="acc"></param>
         /// <returns></returns>
-        void PointAdd4Share(Accounts acc);
+        int PointAdd4Share(Accounts acc);
         /// <summary>
         /// 增加分享链接的注册积分
         /// </summary>
         /// <param name="acc"></param>
         /// <returns></returns>
-        void PointAdd4Register(Accounts acc);
+        int PointAdd4Register(Accounts acc);
         /// <summary>
         /// 支出
         /// </summary>
@@ -328,7 +350,7 @@ namespace Song.ServiceInterfaces
         /// 计算某一个时间区间的积分
         /// </summary>
         /// <param name="acid">学员账户</param>
-        /// <param name="formType">来源分类，1登录，2分享访问；3分享注册；4兑换</param>
+        /// <param name="formType">来源分类，1登录，2分享访问；3分享注册；4兑换; </param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
@@ -424,7 +446,7 @@ namespace Song.ServiceInterfaces
         /// 计算某一个时间区间的积分
         /// </summary>
         /// <param name="acid">学员账户</param>
-        /// <param name="formType">来源分类，1兑换，2消费支出；3分润；4管理员充值</param>
+        /// <param name="formType">来源分类，1兑换，2消费支出；5分润；4管理员充值；</param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
@@ -524,6 +546,15 @@ namespace Song.ServiceInterfaces
         /// <returns></returns>
         MoneyAccount[] MoneyCount(int orgid, int stid, int type, bool? isSuccess, int count);
         /// <summary>
+        /// 计算某一个时间区间的现金
+        /// </summary>
+        /// <param name="acid">学员账户</param>
+        /// <param name="formType">1为管理员操作，2为充值码充值；3在线支付；4购买课程,5分润</param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        int MoneyClac(int acid, int formType, DateTime? start, DateTime? end);
+        /// <summary>
         /// 分页获取资金流水；
         /// </summary>
         /// <param name="orgid">机构id</param>
@@ -563,12 +594,6 @@ namespace Song.ServiceInterfaces
         /// <returns></returns>
         MoneyAccount[] MoneyPager(int orgid, int st, int type, int from, string searTxt, DateTime? start, DateTime? end, int size, int index, out int countSum);
         #endregion
-        /// <summary>
-        /// 当前账户的所有父级账户，依次向上
-        /// </summary>
-        /// <param name="accid">当前账户id</param>
-        /// <returns></returns>
-        Accounts[] Parents(int accid);
-        Accounts[] Parents(Accounts acc);
+        
     }
 }

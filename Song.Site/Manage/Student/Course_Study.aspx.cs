@@ -32,6 +32,29 @@ namespace Song.Site.Manage.Student
             {  
                 BindData(null, null);
             }
+            //此页面的ajax提交，全部采用了POST方式
+            if (Request.ServerVariables["REQUEST_METHOD"] == "POST")
+            {
+                string action = WeiSha.Common.Request.Form["action"].String.ToLower();
+                string couid = WeiSha.Common.Request.Form["couid"].String.ToLower();
+                string json = string.Empty;
+                switch (action)
+                {
+                    case "getstc":
+                        Song.Entities.Student_Course stc = GetStc(couid);
+                        if (stc == null)
+                        {
+                            json = "{\"success\":\"0\"}";
+                        }
+                        else
+                        {
+                            json = "{\"success\":\"1\",data:"+stc.ToJson()+"}";
+                        }
+                        break;
+                }
+                Response.Write(json);
+                Response.End();
+            }
         }
         /// <summary>
         /// 绑定列表
@@ -63,11 +86,12 @@ namespace Song.Site.Manage.Student
         {
             int couid = 0;
             int.TryParse(id.ToString(), out couid);
-            Student_Course sc= Business.Do<ICourse>().StudyCourse(Extend.LoginState.Accounts.CurrentUser.Ac_ID, couid);
+            Student_Course sc= Business.Do<ICourse>().StudentCourse(Extend.LoginState.Accounts.CurrentUser.Ac_ID, couid);
             if (sc == null) return "";
-            if (sc.Stc_IsFree) return "免费（无限期）";
+            if (sc.Stc_IsFree && sc.Stc_EndTime > sc.Stc_StartTime.AddYears(100)) return "免费（无限期）";
+            if (sc.Stc_IsFree && sc.Stc_EndTime < sc.Stc_StartTime.AddYears(100)) return string.Format("免费到{0}", sc.Stc_EndTime.ToString("yyyy年M月d日 HH:mm:ss"));
             if (sc.Stc_IsTry) return "试用";
-            return sc.Stc_StartTime.ToString("yyyy年MM月dd日") + " - " + sc.Stc_EndTime.ToString("yyyy年MM月dd日");
+            return sc.Stc_StartTime.ToString("yyyy年MM月dd日") + " - " + sc.Stc_EndTime.ToString("yyyy年MM月dd日 HH:mm:ss");
         }
         /// <summary>
         /// 取消课程学习
@@ -82,7 +106,7 @@ namespace Song.Site.Manage.Student
             //取消
             Business.Do<ICourse>().DelteCourseBuy(st.Ac_ID, couid);
             //重载当前面
-            this.Reload();
+            this.BindData(null, null);
         }
         /// <summary>
         /// 计算累计学习时间
@@ -157,7 +181,7 @@ namespace Song.Site.Manage.Student
         {
             int couid = 0;
             int.TryParse(couidstr, out couid);
-            return Business.Do<ICourse>().StudyCourse(this.Master.Account.Ac_ID, couid);
+            return Business.Do<ICourse>().StudentCourse(this.Master.Account.Ac_ID, couid);
         }
     }
 }
